@@ -1,9 +1,9 @@
-name: Generate a build and push to another branch
+name: Generate a build and push to build branch
 
 on:
   push:
     branches:
-      - master
+      - dev
   workflow_dispatch:
 
 permissions:
