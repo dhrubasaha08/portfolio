@@ -1,4 +1,4 @@
-name: Deploy with GitHub Pages
+name: Deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -17,7 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build and Push
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -37,7 +36,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    name: Deploy to GitHub Pages
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -55,4 +53,5 @@ jobs:
           preview: false
 
       - name: Check Deployment Status
-        run: echo "Deployment successful!"
+        run: echo "Deployment attempted!"
+
