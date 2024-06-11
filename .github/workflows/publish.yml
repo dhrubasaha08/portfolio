@@ -1,28 +1,30 @@
-name: Generate a build and push to build branch
+name: Build & Deploy
 
 on:
   push:
-    branches:
-      - dev
+    branches: ["dev"]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     name: Build and Push
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Install all dependencies
         run: npm install
-
       - name: Build
         run: npm run build
-
       - name: Push to build branch
         uses: s0/git-publish-subdir-action@develop
         env:
@@ -31,3 +33,18 @@ jobs:
           FOLDER: dist
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: "Build: ({sha}) {msg}"
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Build Branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'build'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
