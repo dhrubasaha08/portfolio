@@ -1,4 +1,4 @@
-name: Deploy Node.js Website with GitHub Pages dependencies preinstalled
+name: Deploy with GitHub Pages
 
 on:
   push:
@@ -28,6 +28,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'github-pages'  # This name must exactly match the expected artifact name in the deploy job
+          path: ./dist  # Ensure this path is where your build outputs its files
+
       - name: Push to build branch
         uses: s0/git-publish-subdir-action@develop
         env:
@@ -42,16 +48,16 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to GitHub Pages
     steps:
-      - name: Checkout build branch
-        uses: actions/checkout@v2
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
         with:
-          ref: build
+          name: 'github-pages'
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifact_name: 'github-pages'
+          artifact_name: 'github-pages'  # Must match the name used in the upload step
 
       - name: Check Deployment Status
         run: echo "Deployment successful!"
