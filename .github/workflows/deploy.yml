@@ -1,4 +1,4 @@
-name: Build and Deploy Site
+name: GitHub Pages Build
 
 on:
   push:
