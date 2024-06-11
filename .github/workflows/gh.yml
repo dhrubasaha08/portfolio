@@ -1,0 +1,37 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Adjust this as necessary to your branch
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    name: Deploy Website
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          timeout: 600000
+          error_count: 10
+          reporting_interval: 5000
+          artifact_name: 'github-pages'
+          preview: false
+
+      - name: Check Deployment Status
+        run: echo "Deployment successful. URL: https://dhrubasaha.co.in/"
+
+      - name: Clean Up Orphan Processes
+        if: always()
+        run: sudo killall -9 orphan_process_name  # Replace 'orphan_process_name' with actual process names if known
