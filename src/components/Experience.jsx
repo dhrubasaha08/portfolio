@@ -92,6 +92,12 @@ const Experience = () => {
         <div className="flex justify-end z-10 sm:block hidden">
           <ExperienceDetails experience={selectedJob} />
         </div>
+
+        {isMobile && (
+          <div className="flex justify-end z-10 sm:hidden w-full">
+            <ExperienceDetails experience={selectedJob} />
+          </div>
+        )}
       </div>
     </div>
   );

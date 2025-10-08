@@ -93,6 +93,12 @@ const Education = () => {
         <div className="flex justify-end z-10 sm:block hidden">
           <EducationDetails education={selectedEducation} />
         </div>
+
+        {isMobile && (
+          <div className="flex justify-end z-10 sm:hidden w-full">
+            <EducationDetails education={selectedEducation} />
+          </div>
+        )}
       </div>
     </div>
   );
