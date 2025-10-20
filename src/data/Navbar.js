@@ -4,16 +4,16 @@ export const navLinks = [
     title: "Hero",
   },
   {
-    id: "experience",
-    title: "Experience",
+    id: "education",
+    title: "Education",
   },
   {
     id: "project",
     title: "Project",
   },
   {
-    id: "education",
-    title: "Education",
+    id: "experience",
+    title: "Experience",
   },
   {
     id: "contact",
