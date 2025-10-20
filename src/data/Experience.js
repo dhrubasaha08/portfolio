@@ -14,7 +14,7 @@ export const experiences = [
     company_name: "Department of Computer & System Sciences, Visva-Bharati",
     date: "June 2023 – Dec 2023",
     details: [
-      "Developed the <span style='color: white;'>VBDCSS-Intranet</span> with Docker to enhance network infrastructure and implemented a secure online exam system.",
+      "Developed the <span style='color: white;'>VBDCSS-Intranet</span> with Docker to enhance network infrastructure and implemented a secure online examination system.",
       "Configured <span style='color: white;'>Raspberry Pi 3B+</span> and <span style='color: white;'>HPE ProLiant DL380 Gen 9</span> to host services and manage network traffic."
     ],
   },
