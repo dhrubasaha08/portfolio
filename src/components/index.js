@@ -1,17 +1,5 @@
-import Hero from "./Hero";
-import CanvasLoader from "./Loader";
-import SpacemanCanvas from "./Spaceman";
-import Position from "./Position";
-import Navbar from "./Navbar";
-
-import Education from "./Education";
-
-import Project from "./Project";
-
-import Experience from "./Experience";
-
-import Contact from "./Contact";
-
-export {
-    Hero, CanvasLoader, SpacemanCanvas, Position, Navbar, Education, Project, Experience, Contact
-};
+export { default as ExternalLink } from "./ExternalLink";
+export { default as Header } from "./Header";
+export { default as ObservatoryGraphic } from "./ObservatoryGraphic";
+export { default as ProjectVisual } from "./ProjectVisual";
+export { default as SectionHeading } from "./SectionHeading";

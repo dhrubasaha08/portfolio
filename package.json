@@ -1,33 +1,45 @@
 {
-  "name": "3dfolio",
+  "name": "dhruba-saha-portfolio",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p jsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:assets": "node scripts/check-build-budget.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run check:assets"
   },
   "dependencies": {
-    "@emailjs/browser": "^3.10.0",
-    "@react-three/drei": "^9.56.24",
-    "framer-motion": "^9.0.7",
-    "gsap": "^3.12.5",
-    "maath": "^0.5.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.1",
-    "react-tilt": "^1.0.2",
-    "react-vertical-timeline-component": "^3.6.0",
-    "three": "^0.165.0"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@types/react": "^18.0.27",
-    "@types/react-dom": "^18.0.10",
-    "@vitejs/plugin-react": "^5.0.4",
-    "autoprefixer": "^10.4.13",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.2.6",
-    "vite": "^7.1.9"
+    "@eslint/js": "^9.39.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^26.1.1",
+    "@types/punycode": "^2.1.4",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "axe-core": "^4.12.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   }
 }
