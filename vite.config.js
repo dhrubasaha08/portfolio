@@ -4,4 +4,8 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.glb', '**/*.gltf'],
+  build: {
+    sourcemap: true,
+    chunkSizeWarningLimit: 900,
+  },
 })

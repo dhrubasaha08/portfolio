@@ -1,20 +1,20 @@
-name: Publish portfolio to GitHub Pages branch
+name: Validate portfolio
 
 on:
-  push:
+  pull_request:
     branches: [dev]
   workflow_dispatch:
 
 concurrency:
-  group: portfolio-pages-publish
+  group: portfolio-validation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-and-publish:
-    name: Build and publish
+  validate:
+    name: Validate with Node.js 22
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -34,7 +34,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Validate and build production site
+      - name: Validate application and production build
         run: npm run check
 
       - name: Verify custom domain artifact
@@ -42,12 +42,3 @@ jobs:
         run: |
           test -f dist/CNAME
           test "$(cat dist/CNAME)" = "dhrubasaha.co.in"
-
-      - name: Publish dist to build branch
-        uses: s0/git-publish-subdir-action@ac113f6bfe8896e85a373534242c949a7ea74c98
-        env:
-          REPO: self
-          BRANCH: build
-          FOLDER: dist
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MESSAGE: "Build: ({sha}) {msg}"
