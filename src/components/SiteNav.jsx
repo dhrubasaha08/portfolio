@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 
+/** @param {{items: readonly import("../data/types.js").NavItem[]}} props */
 export default function SiteNav({ items }) {
-  const [active, setActive] = useState("home");
+  const [active, setActive] = useState("");
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const sections = items
-      .map((item) => document.getElementById(item.href.replace("#", "")))
-      .filter(Boolean);
+      .map((item) => document.getElementById(item.href.slice(1)))
+      .filter((section) => section !== null);
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -14,32 +16,60 @@ export default function SiteNav({ items }) {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         if (visible) setActive(visible.target.id);
       },
-      { rootMargin: "-25% 0px -55%", threshold: [0.01, 0.2, 0.5] },
+      { rootMargin: "-24% 0px -58%", threshold: [0.01, 0.25, 0.5] },
     );
 
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, [items]);
 
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      const range = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setProgress(Math.min(1, Math.max(0, window.scrollY / range)));
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+
   return (
     <header className="site-header">
-      <a className="brand-mark" href="#home" aria-label="DS — Dhruba Saha, home">
-        <span>DS</span>
-        <small>AI / SOFTWARE</small>
-      </a>
-      <nav className="site-nav" aria-label="Primary navigation">
-        {items.map((item, index) => (
-          <a
-            key={item.href}
-            href={item.href}
-            className={active === item.href.replace("#", "") ? "is-active" : ""}
-            aria-current={active === item.href.replace("#", "") ? "location" : undefined}
-          >
-            <span className="nav-index">{String(index + 1).padStart(2, "0")}</span>
-            <span className="nav-label">{item.label}</span>
-          </a>
-        ))}
-      </nav>
+      <div className="site-header-inner">
+        <a className="brand-mark" href="#home" aria-label="Dhruba Saha, home">
+          <span className="brand-full">Dhruba Saha</span>
+          <span className="brand-short" aria-hidden="true">DS</span>
+        </a>
+        <nav className="site-nav" aria-label="Primary navigation">
+          {items.map((item) => {
+            const isActive = active === item.href.slice(1);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={isActive ? "is-active" : ""}
+                aria-label={item.label}
+                aria-current={isActive ? "location" : undefined}
+              >
+                <span className="nav-label-desktop">{item.label}</span>
+                <span className="nav-label-mobile">{item.mobileLabel ?? item.label}</span>
+              </a>
+            );
+          })}
+        </nav>
+      </div>
+      <span className="site-progress" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />
     </header>
   );
 }

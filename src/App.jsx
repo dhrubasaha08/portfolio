@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import CosmicFallback from "./components/CosmicFallback";
 import SceneBoundary from "./components/SceneBoundary";
 import SiteNav from "./components/SiteNav";
 import {
@@ -8,26 +7,26 @@ import {
   capabilityGroups,
   caseStudies,
   contact,
-  currentScope,
   experienceEntries,
   hero,
   impactCaseStudy,
   navItems,
-  sceneStages,
 } from "./data/content";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+/**
+ * @param {{link: import("./data/types.js").EvidenceLink | import("./data/types.js").ContactLink, className?: string}} props
+ */
 function ExternalLink({ link, className = "evidence-link" }) {
-  const isExternal = link.external ?? link.href.startsWith("http");
   return (
     <a
       className={className}
       href={link.href}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noreferrer" : undefined}
+      target={link.external ? "_blank" : undefined}
+      rel={link.external ? "noreferrer" : undefined}
     >
-      <span>{link.label ?? link.value}</span>
+      <span>{"value" in link ? link.value : link.label}</span>
       <span aria-hidden="true">↗</span>
     </a>
   );
@@ -36,8 +35,8 @@ function ExternalLink({ link, className = "evidence-link" }) {
 function MoonVisual() {
   return (
     <div className="moon-visual" aria-hidden="true">
-      <div className="moon-orbit moon-orbit-one" />
-      <div className="moon-orbit moon-orbit-two" />
+      <span className="moon-orbit moon-orbit-one" />
+      <span className="moon-orbit moon-orbit-two" />
       <div className="moon-sphere">
         <span className="moon-crater crater-one" />
         <span className="moon-crater crater-two" />
@@ -46,7 +45,6 @@ function MoonVisual() {
         <span className="moon-event event-two" />
         <span className="moon-event event-three" />
       </div>
-      <span className="moon-coordinate">LUNAR EVENT MAP</span>
     </div>
   );
 }
@@ -54,62 +52,53 @@ function MoonVisual() {
 function KyberVisual() {
   return (
     <div className="kyber-visual" aria-hidden="true">
-      <div className="kyber-core">
-        <span>LOCAL</span>
-        <strong>KYBER</strong>
-        <small>CONTROL PLANE / R&D</small>
-      </div>
-      <span className="kyber-ring ring-one" />
-      <span className="kyber-ring ring-two" />
-      <span className="kyber-ring ring-three" />
-      <span className="kyber-node node-one">CONTEXT</span>
-      <span className="kyber-node node-two">GOVERN</span>
-      <span className="kyber-node node-three">ROUTE</span>
+      <span className="kyber-glow" />
+      <span className="kyber-ring kyber-ring-one" />
+      <span className="kyber-ring kyber-ring-two" />
+      <span className="kyber-ring kyber-ring-three" />
+      <span className="kyber-moon" />
     </div>
   );
 }
 
-function ProjectPanel({ study, index }) {
+/** @param {{study: import("./data/types.js").CaseStudy}} props */
+function ProjectStory({ study }) {
   return (
-    <article className={`project-panel accent-${study.accent}`}>
-      <div className="project-visual">{study.id === "project-kyber" ? <KyberVisual /> : <MoonVisual />}</div>
+    <article className="project-story">
+      <div className="project-visual">
+        {study.id === "project-kyber" ? <KyberVisual /> : <MoonVisual />}
+      </div>
       <div className="project-copy">
-        <div className="project-meta">
-          <span>{study.eyebrow}</span>
-          <span className="status-label">{study.status}</span>
-        </div>
+        <p className="project-status">{study.status}</p>
         <h3>{study.title}</h3>
         <p className="project-summary">{study.summary}</p>
         <dl className="project-details">
           <div>
-            <dt>My contribution</dt>
+            <dt>Contribution</dt>
             <dd>{study.contribution}</dd>
           </div>
           <div>
-            <dt>Current outcome</dt>
+            <dt>Outcome</dt>
             <dd>{study.outcome}</dd>
           </div>
         </dl>
         {study.evidence.length ? (
-          <div className="evidence-links" aria-label={`${study.title} evidence links`}>
+          <div className="evidence-links" aria-label={`${study.title} links`}>
             {study.evidence.map((link) => (
               <ExternalLink key={link.href} link={link} />
             ))}
           </div>
         ) : (
-          <p className="private-note">No public repository or product link.</p>
+          <p className="private-note">Private research. No public link.</p>
         )}
       </div>
-      <span className="project-number" aria-hidden="true">{String(index + 2).padStart(2, "0")}</span>
     </article>
   );
 }
 
 function App() {
   const immersiveRef = useRef(/** @type {HTMLElement | null} */ (null));
-  const stageRefs = useRef(/** @type {(HTMLElement | null)[]} */ ([]));
   const pointerFrame = useRef(/** @type {number | null} */ (null));
-  const [activeStage, setActiveStage] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [viewportTier, setViewportTier] = useState("desktop");
@@ -124,7 +113,9 @@ function App() {
       const range = Math.max(1, rect.height - window.innerHeight);
       setScrollProgress(clamp(-rect.top / range, 0, 1));
       setImmersiveVisible(rect.bottom > 0 && rect.top < window.innerHeight);
-      setViewportTier(window.innerWidth < 768 ? "mobile" : window.innerWidth < 1100 ? "tablet" : "desktop");
+      setViewportTier(
+        window.innerWidth < 768 ? "mobile" : window.innerWidth < 1100 ? "tablet" : "desktop",
+      );
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
@@ -141,25 +132,6 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) {
-          const target = /** @type {HTMLElement} */ (visible.target);
-          setActiveStage(Number(target.dataset.stageIndex));
-        }
-      },
-      { rootMargin: "-30% 0px -40%", threshold: [0.15, 0.4, 0.7] },
-    );
-    stageRefs.current.forEach((stage) => {
-      if (stage) observer.observe(stage);
-    });
-    return () => observer.disconnect();
-  }, []);
-
   const handlePointerMove = (event) => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -169,12 +141,6 @@ function App() {
     };
     if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
     pointerFrame.current = requestAnimationFrame(() => setPointer(next));
-  };
-
-  const selectStage = (index) => {
-    setActiveStage(index);
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    stageRefs.current[index]?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
   };
 
   return (
@@ -193,129 +159,95 @@ function App() {
         >
           <div className="cosmic-viewport">
             <SceneBoundary
-              activeStage={activeStage}
               scrollProgress={scrollProgress}
               pointer={pointer}
               viewportTier={viewportTier}
               visible={immersiveVisible}
             />
             <div className="scene-vignette" aria-hidden="true" />
-            <div className="scene-readout" aria-hidden="true">
-              <span>ORBITAL WORKSPACE</span>
-              <span>DE / GERMANY</span>
-            </div>
-            <div className="stage-dock" role="group" aria-label="AI workflow stages">
-              {sceneStages.map((stage, index) => (
-                <button
-                  key={stage.id}
-                  type="button"
-                  className={activeStage === index ? `is-active accent-${stage.accent}` : ""}
-                  aria-label={stage.label}
-                  aria-pressed={activeStage === index}
-                  onClick={() => selectStage(index)}
-                >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  {stage.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="immersive-copy">
             <div className="hero-panel">
               <div className="hero-copy">
-                <p className="eyebrow hero-eyebrow"><span className="live-dot" />{hero.eyebrow}</p>
-                <h1 id="hero-heading">
-                  <span>I build applied AI systems</span>
-                  <span>that turn manual work into</span>
-                  <span className="headline-accent">dependable software.</span>
-                </h1>
+                <p className="hero-eyebrow">{hero.eyebrow}</p>
+                <h1 id="hero-heading">{hero.headline}</h1>
                 <p className="hero-summary">{hero.summary}</p>
                 <div className="hero-actions">
-                  <a className="button button-primary" href={hero.primaryAction.href}>{hero.primaryAction.label}<span aria-hidden="true">↓</span></a>
-                  <a className="button button-quiet" href={hero.secondaryAction.href}>{hero.secondaryAction.label}<span aria-hidden="true">↗</span></a>
+                  <a className="button button-primary" href={hero.primaryAction.href}>
+                    {hero.primaryAction.label}<span aria-hidden="true">↓</span>
+                  </a>
+                  <a className="button button-quiet" href={hero.secondaryAction.href}>
+                    {hero.secondaryAction.label}<span aria-hidden="true">↗</span>
+                  </a>
                 </div>
-              </div>
-              <div className="hero-scroll-cue" aria-hidden="true">
-                <span>SCROLL TO TRAVERSE</span>
-                <i />
               </div>
             </div>
 
             <section id="impact" className="impact-story" aria-labelledby="impact-heading">
-              <article className="impact-overview">
-                <div className="impact-copy">
-                  <p className="eyebrow">{impactCaseStudy.eyebrow}</p>
-                  <h2 id="impact-heading">{impactCaseStudy.title}</h2>
-                  <p>{impactCaseStudy.summary}</p>
-                  <p className="confidentiality-note">{impactCaseStudy.confidentialityNote}</p>
+              <div className="impact-copy">
+                <p className="section-kicker">Current impact</p>
+                <h2 id="impact-heading">{impactCaseStudy.title}</h2>
+                <p>{impactCaseStudy.summary}</p>
+                <p>{impactCaseStudy.outcome}</p>
+                <p className="confidentiality-note">{impactCaseStudy.confidentialityNote}</p>
+              </div>
+              <div className="impact-metric" aria-label={impactCaseStudy.metric.label}>
+                <div>
+                  <span>Before</span>
+                  <strong>{impactCaseStudy.metric.before}</strong>
                 </div>
-                <div className="metric-orbit" aria-label={impactCaseStudy.metric.label}>
-                  <span className="metric-before"><small>BEFORE</small>{impactCaseStudy.metric.before}</span>
-                  <span className="metric-line" aria-hidden="true"><i /></span>
-                  <span className="metric-after"><small>AI-ASSISTED</small>{impactCaseStudy.metric.after}</span>
+                <span className="metric-arrow" aria-hidden="true">→</span>
+                <div>
+                  <span>After</span>
+                  <strong>{impactCaseStudy.metric.after}</strong>
                 </div>
-              </article>
-
-              <div className="stage-narrative" aria-label="How the workflow operates">
-                {sceneStages.map((stage, index) => (
-                  <article
-                    key={stage.id}
-                    ref={(node) => { stageRefs.current[index] = node; }}
-                    data-stage-index={index}
-                    className={`stage-panel accent-${stage.accent} ${activeStage === index ? "is-active" : ""}`}
-                  >
-                    <p className="stage-label"><span>{String(index + 1).padStart(2, "0")}</span>{stage.label}</p>
-                    <h3>{stage.title}</h3>
-                    <p>{stage.description}</p>
-                  </article>
-                ))}
+                <p>Expert review stays in the loop.</p>
               </div>
             </section>
           </div>
         </section>
 
-        <section id="now" className="content-section now-section" aria-labelledby="now-heading">
+        <section id="work" className="content-section work-section" aria-labelledby="work-heading">
           <div className="section-heading">
-            <p className="eyebrow">Current engineering scope</p>
-            <h2 id="now-heading">What I build now.</h2>
-            <p>Production-oriented software at the point where models, backend systems, and operational workflows meet.</p>
+            <p className="section-kicker">Selected work</p>
+            <h2 id="work-heading">Selected work, without the hype.</h2>
+            <p>One active research direction and one earlier public software project, described at their actual stage.</p>
           </div>
-          <div className="scope-list">
-            {currentScope.map((item) => (
-              <article key={item.id} className={`scope-row accent-${item.accent}`}>
-                <p>{item.label}</p>
-                <h3>{item.title}</h3>
-                <span>{item.description}</span>
-              </article>
-            ))}
+          <div className="project-list">
+            {caseStudies.map((study) => <ProjectStory key={study.id} study={study} />)}
           </div>
         </section>
 
-        <section id="work" className="content-section work-section" aria-labelledby="work-heading">
-          <div className="section-heading section-heading-wide">
-            <p className="eyebrow">Selected software work</p>
-            <h2 id="work-heading">Current research and earlier proof.</h2>
-            <p>The workflow above is the first case study. These two projects add an active research direction and a public interactive software example.</p>
+        <section id="practice" className="content-section practice-section" aria-labelledby="practice-heading">
+          <div className="section-heading">
+            <p className="section-kicker">Practice</p>
+            <h2 id="practice-heading">A software practice built around useful systems.</h2>
+            <p>Applied AI sits inside a broader engineering practice—not above it.</p>
           </div>
-          <div className="project-list">
-            {caseStudies.slice(1).map((study, index) => (
-              <ProjectPanel key={study.id} study={study} index={index} />
+          <div className="practice-list">
+            {capabilityGroups.map((group) => (
+              <article key={group.id} className="practice-row">
+                <h3>{group.title}</h3>
+                <div>
+                  <p>{group.description}</p>
+                  <p className="practice-tools">{group.skills.join(" · ")}</p>
+                </div>
+              </article>
             ))}
           </div>
         </section>
 
         <section id="experience" className="content-section experience-section" aria-labelledby="experience-heading">
           <div className="section-heading">
-            <p className="eyebrow">Experience</p>
-            <h2 id="experience-heading">Building where ambiguity meets delivery.</h2>
+            <p className="section-kicker">Experience</p>
+            <h2 id="experience-heading">Experience shaped by delivery.</h2>
           </div>
           <div className="experience-list">
-            {experienceEntries.map((entry, index) => (
+            {experienceEntries.map((entry) => (
               <article key={entry.id} className={entry.current ? "experience-row is-current" : "experience-row"}>
-                <div className="experience-marker"><span>{String(index + 1).padStart(2, "0")}</span><i /></div>
                 <div className="experience-title">
-                  <p>{entry.current ? "CURRENT ROLE" : entry.period}</p>
+                  <p>{entry.current ? "Current role" : entry.period}</p>
                   <h3>{entry.role}</h3>
                   {entry.organization ? <span>{entry.organization}</span> : null}
                   <span>{entry.location}</span>
@@ -331,52 +263,29 @@ function App() {
           </div>
         </section>
 
-        <section id="capabilities" className="content-section capability-section" aria-labelledby="capabilities-heading">
-          <div className="section-heading">
-            <p className="eyebrow">Capabilities</p>
-            <h2 id="capabilities-heading">Systems, not isolated model calls.</h2>
-          </div>
-          <div className="capability-orbit">
-            <div className="capability-center" aria-hidden="true"><CosmicFallback /></div>
-            <div className="capability-list">
-              {capabilityGroups.map((group, index) => (
-                <article key={group.id} className={`capability-row accent-${group.accent}`}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div>
-                    <h3>{group.title}</h3>
-                    <p>{group.description}</p>
-                    <ul aria-label={`${group.title} skills`}>
-                      {group.skills.map((skill) => <li key={skill}>{skill}</li>)}
-                    </ul>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section id="about" className="content-section about-section" aria-labelledby="about-heading">
           <div className="about-copy">
-            <p className="eyebrow">{about.eyebrow}</p>
+            <p className="section-kicker">About</p>
             <h2 id="about-heading">{about.title}</h2>
             {about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           </div>
           <aside className="photography-note" aria-labelledby="photography-heading">
-            <span className="constellation" aria-hidden="true"><i /><i /><i /><i /></span>
-            <p className="eyebrow">Personal aperture</p>
+            <div className="photography-orbit" aria-hidden="true"><span /><span /><span /></div>
+            <p className="section-kicker">Photography</p>
             <h3 id="photography-heading">{about.photography.title}</h3>
             <p>{about.photography.body}</p>
           </aside>
         </section>
 
         <section id="contact" className="contact-section" aria-labelledby="contact-heading">
-          <div className="contact-orbit" aria-hidden="true"><span /><span /><span /></div>
           <div className="contact-copy">
-            <p className="eyebrow">{contact.eyebrow}</p>
+            <p className="section-kicker">Contact</p>
             <h2 id="contact-heading">{contact.title}</h2>
             <p>{contact.body}</p>
             <div className="contact-links">
-              {contact.links.map((link) => <ExternalLink key={link.href} link={link} className="contact-link" />)}
+              {contact.links.map((link) => (
+                <ExternalLink key={link.href} link={link} className="contact-link" />
+              ))}
             </div>
           </div>
         </section>
@@ -387,7 +296,7 @@ function App() {
         <p>
           Astronaut: <a href={astronautCredit.source.href} target="_blank" rel="noreferrer">{astronautCredit.title}</a> by {astronautCredit.creator}, {astronautCredit.license}.
         </p>
-        <a href="#home">Back to orbit ↑</a>
+        <a href="#home">Back to top ↑</a>
       </footer>
     </>
   );

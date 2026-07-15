@@ -5,7 +5,7 @@
 - **Name:** Dhruba Saha
 - **Location:** Germany
 - **Hero identity:** Dhruba Saha · Software Engineer · Germany
-- **Headline:** I build applied AI systems that turn manual work into dependable software.
+- **Headline:** I turn complex workflows into dependable software.
 - **Current role label:** Software Engineer · Applied AI & Automation · Current
 - **Employer:** intentionally unnamed
 
@@ -13,7 +13,7 @@ The portfolio should describe current work through public-safe outcomes and engi
 
 ## Approved current-work language
 
-Dhruba designs and ships production-oriented AI workflows, backend services, API integrations, retrieval and context systems, and internal tools. The narrative may discuss structured outputs, orchestration, validation, dependable delivery, and retained expert review.
+Dhruba designs and ships backend services, workflow automations, API integrations, internal tools, and production-oriented applied AI systems. The narrative should remain software-first and may discuss structured outputs, retrieval, orchestration, validation, dependable delivery, and retained expert review.
 
 One outcome is approved for publication:
 

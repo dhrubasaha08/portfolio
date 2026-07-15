@@ -41,7 +41,7 @@ class SceneErrorBoundary extends Component {
   }
 }
 
-export default function SceneBoundary({ activeStage, scrollProgress, pointer, viewportTier, visible }) {
+export default function SceneBoundary({ scrollProgress, pointer, viewportTier, visible }) {
   const [mode, setMode] = useState("static");
   const [activated, setActivated] = useState(false);
   const [ready, setReady] = useState(false);
@@ -98,7 +98,6 @@ export default function SceneBoundary({ activeStage, scrollProgress, pointer, vi
           <SceneErrorBoundary onFailure={() => setFailed(true)}>
             <Suspense fallback={null}>
               <LazyAiCosmicScene
-                activeStage={activeStage}
                 scrollProgress={scrollProgress}
                 pointer={pointer}
                 viewportTier={viewportTier}

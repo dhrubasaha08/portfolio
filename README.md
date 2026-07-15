@@ -1,8 +1,8 @@
 # Dhruba Saha — Portfolio
 
-An immersive React portfolio focused on applied AI, backend automation, internal tools, and developer-tooling research.
+An immersive React portfolio focused on dependable software, backend automation, internal tools, and applied AI.
 
-The opening experience combines a semantic HTML narrative with a lazily loaded React Three Fiber scene. An animated astronaut moves through a procedural graph representing five workflow stages: Ingest, Retrieve, Orchestrate, Validate, and Deliver. The readable content and controls remain in the document, while WebGL is a progressive visual enhancement.
+The opening experience combines a cinematic editorial HTML narrative with a lazily loaded React Three Fiber scene. An animated astronaut moves through a warm celestial field as native document scrolling advances the camera. All readable content and navigation remain in the document, while WebGL is a progressive visual enhancement.
 
 ## Local development
 
@@ -30,7 +30,7 @@ npm run check
 - React 18 and Vite
 - Structured, JSDoc-checked public content
 - Lazy React Three Fiber scene with a static fallback
-- Native document scrolling and semantic navigation
+- Native document scrolling and quiet semantic navigation
 - Reduced-motion, data-saving, and WebGL failure modes
 - Vitest, Testing Library, axe, Playwright, ESLint, and JavaScript type checking
 

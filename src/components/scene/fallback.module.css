@@ -1,0 +1,101 @@
+.fallback {
+  background:
+    radial-gradient(circle at 61% 43%, rgb(242 106 61 / 8%), transparent 28%),
+    radial-gradient(circle at 70% 48%, rgb(59 163 154 / 4%), transparent 42%);
+}
+
+.fallback::before {
+  background: radial-gradient(circle, rgb(242 106 61 / 10%), transparent 62%);
+}
+
+.fallback::after {
+  opacity: 0.34;
+  background-image:
+    radial-gradient(circle, rgb(243 239 231 / 68%) 0 1px, transparent 1.4px),
+    radial-gradient(circle, rgb(59 163 154 / 35%) 0 1px, transparent 1.4px);
+  background-position: 0 0, 43px 67px;
+  background-size: 142px 153px, 207px 223px;
+}
+
+.fallback .art {
+  width: min(78vw, 64rem);
+  transform: translateX(17%);
+  filter: drop-shadow(0 0 2.4rem rgb(242 106 61 / 9%));
+}
+
+.stars {
+  fill: #f3efe7;
+  opacity: 0.66;
+}
+
+.orbits {
+  stroke-width: 0.12;
+  transform-origin: 55px 49px;
+}
+
+.orbits ellipse:nth-child(1) {
+  stroke: rgb(242 106 61 / 48%);
+}
+
+.orbits ellipse:nth-child(2) {
+  stroke: rgb(243 239 231 / 22%);
+  stroke-dasharray: 0.9 2.1;
+}
+
+.orbits ellipse:nth-child(3) {
+  stroke: rgb(59 163 154 / 24%);
+  stroke-dasharray: 1.5 2.8;
+}
+
+.trail {
+  stroke-width: 0.2;
+}
+
+.core {
+  fill: #f3efe7;
+  filter: drop-shadow(0 0 3px rgb(243 239 231 / 72%));
+}
+
+.halo {
+  stroke: rgb(242 106 61 / 40%);
+  stroke-width: 0.22;
+}
+
+.astronaut {
+  fill: rgb(243 239 231 / 62%);
+  stroke: rgb(243 239 231 / 78%);
+  stroke-linecap: round;
+  stroke-width: 1.05;
+  transform-origin: 71px 44px;
+  animation: drift 8.5s ease-in-out infinite;
+}
+
+.visor {
+  fill: rgb(59 163 154 / 52%);
+  stroke: rgb(59 163 154 / 74%);
+  stroke-width: 0.35;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0.8px, -1.2px, 0) rotate(1.2deg);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .fallback .art {
+    width: 118vw;
+    transform: translate(13%, -4%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .astronaut {
+    animation: none;
+  }
+}

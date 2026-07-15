@@ -1,14 +1,12 @@
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { CosmicWorld } from "./CosmicWorld";
-import { resolveStageIndex } from "./sceneData";
 import styles from "./scene.module.css";
 
 /**
  * @typedef {{x?: number, y?: number}} ScenePointer
  *
  * @typedef {object} AiCosmicSceneProps
- * @property {string | number} [activeStage]
  * @property {number} [scrollProgress]
  * @property {ScenePointer} [pointer]
  * @property {'mobile' | 'tablet' | 'desktop'} [viewportTier]
@@ -22,12 +20,11 @@ import styles from "./scene.module.css";
 
 /**
  * Decorative WebGL layer for the opening narrative. All readable content and
- * stage controls intentionally live in the caller's semantic DOM.
+ * interactive controls intentionally live in the caller's semantic DOM.
  *
  * @param {AiCosmicSceneProps} props
  */
 export function AiCosmicScene({
-  activeStage = "orchestrate",
   scrollProgress = 0,
   pointer = { x: 0, y: 0 },
   viewportTier = "desktop",
@@ -48,8 +45,6 @@ export function AiCosmicScene({
   const [isDocumentVisible, setIsDocumentVisible] = useState(
     typeof document === "undefined" || document.visibilityState !== "hidden",
   );
-  const activeIndex = resolveStageIndex(activeStage);
-
   useEffect(() => {
     scrollProgressRef.current = Number.isFinite(scrollProgress)
       ? Math.max(0, Math.min(1, scrollProgress))
@@ -101,7 +96,6 @@ export function AiCosmicScene({
       className={rootClassName}
       aria-hidden="true"
       data-renderer="webgl"
-      data-scene-active-stage={String(activeStage)}
     >
       <Canvas
         className={styles.canvas}
@@ -122,11 +116,10 @@ export function AiCosmicScene({
           powerPreference: "high-performance",
         }}
         onCreated={({ gl }) => {
-          gl.setClearColor("#030712", 1);
+          gl.setClearColor("#05070B", 1);
         }}
       >
         <CosmicWorld
-          activeIndex={activeIndex}
           scrollProgressRef={scrollProgressRef}
           pointerRef={pointerRef}
           viewportTier={viewportTier}

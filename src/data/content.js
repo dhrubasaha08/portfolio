@@ -1,11 +1,9 @@
 /** @typedef {import("./types.js").CapabilityGroup} CapabilityGroup */
 /** @typedef {import("./types.js").CaseStudy} CaseStudy */
 /** @typedef {import("./types.js").ContactLink} ContactLink */
-/** @typedef {import("./types.js").CurrentScopeItem} CurrentScopeItem */
 /** @typedef {import("./types.js").EvidenceLink} EvidenceLink */
 /** @typedef {import("./types.js").ExperienceEntry} ExperienceEntry */
 /** @typedef {import("./types.js").NavItem} NavItem */
-/** @typedef {import("./types.js").SceneStage} SceneStage */
 
 export const identity = {
   name: "Dhruba Saha",
@@ -16,177 +14,63 @@ export const identity = {
 
 export const hero = {
   eyebrow: identity.line,
-  headline:
-    "I build applied AI systems that turn manual work into dependable software.",
+  headline: "I turn complex workflows into dependable software.",
   summary:
-    "I design and ship AI workflows, backend services, and internal tools—combining useful context, structured outputs, orchestration, and human review to make operational work faster and more reliable.",
-  primaryAction: { label: "Explore current work", href: "#impact" },
-  secondaryAction: { label: "Contact", href: "#contact" },
+    "I design backend systems, workflow automation, and internal tools for work that is too important to remain manual. Applied AI is one part of that practice—not the whole story.",
+  primaryAction: { label: "View selected work", href: "#work" },
+  secondaryAction: { label: "Get in touch", href: "#contact" },
 };
 
 /** @type {readonly NavItem[]} */
 export const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Impact", href: "#impact" },
-  { label: "Now", href: "#now" },
   { label: "Work", href: "#work" },
-  { label: "Career", href: "#experience" },
+  { label: "Experience", mobileLabel: "Career", href: "#experience" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
 
-/** @type {readonly SceneStage[]} */
-export const sceneStages = [
-  {
-    id: "ingest",
-    label: "Ingest",
-    title: "Bring the right inputs into focus.",
-    description:
-      "Gather the operational context, source material, and constraints that define a useful result.",
-    accent: "amber",
-    cameraTarget: [-3.4, 0.9, 5.8],
-    nodeTarget: [-3.5, 0.6, 0],
-  },
-  {
-    id: "retrieve",
-    label: "Retrieve",
-    title: "Select context with intent.",
-    description:
-      "Find the examples and domain knowledge that matter for the task instead of sending everything at once.",
-    accent: "cyan",
-    cameraTarget: [-1.6, 1.2, 5.2],
-    nodeTarget: [-1.7, 1.1, 0],
-  },
-  {
-    id: "orchestrate",
-    label: "Orchestrate",
-    title: "Turn model calls into a system.",
-    description:
-      "Coordinate services, data, instructions, and structured outputs as one observable workflow.",
-    accent: "violet",
-    cameraTarget: [0, 0.5, 4.7],
-    nodeTarget: [0, 0.25, 0],
-  },
-  {
-    id: "validate",
-    label: "Validate",
-    title: "Keep expert judgment in the loop.",
-    description:
-      "Check outputs against domain rules and route consequential decisions through expert review.",
-    accent: "cyan",
-    cameraTarget: [1.8, 1.1, 5.2],
-    nodeTarget: [1.7, 1, 0],
-  },
-  {
-    id: "deliver",
-    label: "Deliver",
-    title: "Ship a dependable working tool.",
-    description:
-      "Return useful output through software that fits the real operational workflow and remains understandable.",
-    accent: "violet",
-    cameraTarget: [3.5, 0.8, 5.8],
-    nodeTarget: [3.5, 0.55, 0],
-  },
-];
-
 export const impactCaseStudy = {
   id: "ai-workflow",
-  eyebrow: "Current systems impact · Sanitized case study",
-  title: "AI-assisted workflow automation",
+  title: "A faster path from source material to expert-ready output.",
   summary:
-    "Designed and implemented an AI-assisted workflow for a time-intensive operational process, combining retrieval, structured outputs, orchestration, validation, and expert review.",
+    "I designed and implemented an internal workflow that brings retrieval, structured outputs, service orchestration, and domain validation into one dependable process.",
   metric: {
-    before: "Approximately eight hours",
-    after: "Approximately five minutes",
-    label: "Manual process → AI-assisted generation",
+    before: "≈ 8 hours",
+    after: "≈ 5 minutes",
+    label: "Approximately eight hours reduced to approximately five minutes",
   },
   outcome:
-    "Reduced an approximately eight-hour process to approximately five minutes while retaining expert review.",
+    "The system reduced an approximately eight-hour process to approximately five minutes of generation time. Expert review remains part of every final decision.",
   confidentialityNote:
-    "The case study is intentionally sanitized; source material and implementation details remain confidential.",
+    "This case study is intentionally sanitized. The employer, source material, and proprietary implementation details remain private.",
 };
-
-/** @type {readonly CurrentScopeItem[]} */
-export const currentScope = [
-  {
-    id: "backend",
-    label: "01 · Connect",
-    title: "Backend services & APIs",
-    description:
-      "Services, integrations, and data flows that turn business requirements into stable system boundaries.",
-    accent: "cyan",
-  },
-  {
-    id: "context",
-    label: "02 · Ground",
-    title: "Retrieval & context systems",
-    description:
-      "Purposeful context selection, semantic retrieval, and structured knowledge flows for useful model output.",
-    accent: "violet",
-  },
-  {
-    id: "orchestration",
-    label: "03 · Coordinate",
-    title: "AI workflow orchestration",
-    description:
-      "Observable workflows that coordinate models, services, validation, and human decisions.",
-    accent: "amber",
-  },
-  {
-    id: "internal-tools",
-    label: "04 · Deliver",
-    title: "Internal tools & dependable delivery",
-    description:
-      "Focused software that removes repetitive work while remaining clear enough to operate and maintain.",
-    accent: "cyan",
-  },
-];
 
 /** @type {readonly CaseStudy[]} */
 export const caseStudies = [
   {
-    id: "ai-workflow",
-    eyebrow: "01 · Current systems impact",
-    title: "AI-assisted workflow automation",
-    status: "Sanitized internal case study",
-    visibility: "sanitized",
-    summary:
-      "A production-oriented workflow that combines retrieval, structured outputs, orchestration, validation, and expert review.",
-    contribution:
-      "Designed and implemented the workflow architecture, service connections, context flow, and review path.",
-    outcome:
-      "Reduced an approximately eight-hour process to approximately five minutes while retaining expert review.",
-    accent: "amber",
-    evidence: [],
-  },
-  {
     id: "project-kyber",
-    eyebrow: "02 · Developer tooling research",
     title: "Project Kyber",
     status: "Private active R&D",
     visibility: "private-rnd",
     summary:
-      "Researching a local-first control plane for AI coding agents, focused on architectural governance, context quality, sandboxed execution, and cost-aware model routing.",
+      "A local-first research direction exploring how context quality, architectural governance, and controlled execution could make AI-assisted software development more dependable.",
     contribution:
-      "Defining the research thesis and exploring how stronger context and governance could make agent-assisted software development more dependable.",
+      "I am defining the thesis and testing the system boundaries behind it.",
     outcome:
-      "An active private research direction—not presented as a completed or deployed product.",
-    accent: "violet",
+      "Active private research, presented without links or completed-product claims.",
     evidence: [],
   },
   {
     id: "tremor-track",
-    eyebrow: "03 · Earlier software work",
     title: "Tremor Track — Moonquake Map 2.0",
     status: "Team hackathon project · Working live demo",
     visibility: "public",
     summary:
-      "An interactive 3D lunar globe created by a team for NASA Space Apps Challenge 2023 to make historical moonquake and geological data easier to explore.",
+      "An interactive 3D lunar globe created by a team for NASA Space Apps Challenge 2023, making historical moonquake and geological data easier to explore.",
     contribution:
-      "Contributed to a collaborative software project spanning interactive 3D visualization, processed scientific data, and exploratory controls.",
+      "I contributed to a collaborative software project spanning interactive 3D visualization, processed scientific data, and exploratory controls.",
     outcome:
       "A working public demo, source repository, and official challenge project page.",
-    accent: "cyan",
     evidence: [
       {
         label: "Repository",
@@ -210,6 +94,38 @@ export const caseStudies = [
   },
 ];
 
+/** @type {readonly CapabilityGroup[]} */
+export const capabilityGroups = [
+  {
+    id: "backend",
+    title: "Backend systems",
+    description:
+      "Services, APIs, and data flows with clear boundaries—built to remain understandable after launch.",
+    skills: ["Python", "JavaScript & TypeScript", "Node.js", "PostgreSQL", "REST APIs"],
+  },
+  {
+    id: "automation",
+    title: "Workflow automation",
+    description:
+      "Operational processes translated into observable software with deliberate validation and failure paths.",
+    skills: ["Service orchestration", "API integrations", "Process mapping", "Human review"],
+  },
+  {
+    id: "internal-tools",
+    title: "Internal tools",
+    description:
+      "Focused interfaces that make complex work easier without hiding the decisions people still need to make.",
+    skills: ["Product thinking", "Internal tool UX", "Rapid prototyping", "Documentation"],
+  },
+  {
+    id: "applied-ai",
+    title: "Applied AI",
+    description:
+      "Model capabilities used where they earn their place, grounded in useful context and structured results.",
+    skills: ["Retrieval", "Structured outputs", "Semantic search", "Context design", "Evaluation"],
+  },
+];
+
 /** @type {readonly ExperienceEntry[]} */
 export const experienceEntries = [
   {
@@ -217,11 +133,11 @@ export const experienceEntries = [
     role: "Software Engineer · Applied AI & Automation · Current",
     location: "Germany",
     summary:
-      "Builds AI-assisted internal tools, backend services, and workflow automations that translate operational needs into reliable software.",
+      "I build internal tools, backend services, and workflow automations that turn ambiguous operational needs into reliable software.",
     highlights: [
-      "Designs backend services, APIs, integrations, and data workflows.",
-      "Applies retrieval, structured outputs, validation, and expert review to operational processes.",
-      "Takes ambiguous problems from architecture through delivery and documentation.",
+      "Design backend services, APIs, integrations, and data workflows.",
+      "Apply retrieval, structured outputs, validation, and expert review where AI adds practical value.",
+      "Take projects from architecture through delivery and documentation.",
     ],
     current: true,
   },
@@ -241,64 +157,15 @@ export const experienceEntries = [
   },
 ];
 
-/** @type {readonly CapabilityGroup[]} */
-export const capabilityGroups = [
-  {
-    id: "applied-ai",
-    title: "Applied AI systems",
-    description:
-      "Application-layer AI designed around useful context, structured results, evaluation, and human judgment.",
-    skills: [
-      "Retrieval-augmented generation",
-      "Structured outputs",
-      "Semantic search",
-      "Context design",
-      "Human-in-the-loop validation",
-    ],
-    accent: "violet",
-  },
-  {
-    id: "backend",
-    title: "Backend engineering",
-    description:
-      "Services and data interfaces that connect workflows to dependable system boundaries.",
-    skills: ["Python", "JavaScript & TypeScript", "Node.js", "PostgreSQL", "REST APIs"],
-    accent: "cyan",
-  },
-  {
-    id: "automation",
-    title: "Automation & integrations",
-    description:
-      "Maintainable workflows that coordinate software, data, validation, and operational decisions.",
-    skills: [
-      "Workflow orchestration",
-      "API integrations",
-      "Business process mapping",
-      "Internal tool UX",
-      "Rapid prototyping",
-    ],
-    accent: "amber",
-  },
-  {
-    id: "delivery",
-    title: "Delivery & operations",
-    description:
-      "The practical engineering needed to ship, observe, and maintain software beyond a prototype.",
-    skills: ["Docker", "Linux", "Git & GitHub", "GitHub Actions", "Technical documentation"],
-    accent: "cyan",
-  },
-];
-
 export const about = {
-  eyebrow: "About",
-  title: "Curious about complex systems. Focused on useful outcomes.",
+  title: "Reliable software starts with clear thinking.",
   paragraphs: [
-    "Earlier open-source and infrastructure work shaped how I think about reliability, clear interfaces, and maintainability.",
-    "Today I apply that discipline to applied AI, backend automation, and internal tools—especially where the problem is ambiguous and the software has to fit real operational work.",
+    "My earlier infrastructure work shaped how I think about reliability, interfaces, and maintainability. That same discipline now guides the software I build for complex operational work.",
+    "I am most useful when a problem is still ambiguous: listening closely, finding the real system boundary, and shipping something people can trust.",
   ],
   photography: {
-    title: "Away from the screen",
-    body: "I photograph wildlife, nature, and the night sky through astrophotography—a slower practice built on patience and observation.",
+    title: "A different kind of observation",
+    body: "Away from software, I photograph wildlife, nature, and the night sky—a slower practice built on patience and attention.",
   },
 };
 
@@ -309,20 +176,21 @@ export const contactLinks = [
     value: "contact@dhrubasaha.co.in",
     href: "mailto:contact@dhrubasaha.co.in",
     kind: "email",
+    external: false,
   },
   {
     label: "GitHub",
     value: "github.com/dhrubasaha08",
     href: "https://github.com/dhrubasaha08",
     kind: "profile",
+    external: true,
   },
 ];
 
 export const contact = {
-  eyebrow: "Contact",
-  title: "Let’s build software that makes complex work simpler.",
+  title: "Let’s make complex work simpler.",
   body:
-    "For roles and collaborations in applied AI, backend automation, internal tools, or developer tooling, send me an email or explore my work on GitHub.",
+    "For software engineering roles and collaborations around backend systems, automation, internal tools, or thoughtfully applied AI, send me an email or explore my work on GitHub.",
   links: contactLinks,
 };
 

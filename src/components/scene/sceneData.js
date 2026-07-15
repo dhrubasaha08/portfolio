@@ -1,67 +1,58 @@
 /**
- * @typedef {'ingest' | 'retrieve' | 'orchestrate' | 'validate' | 'deliver'} SceneStageId
+ * Five private waypoints preserve the original scroll choreography without
+ * exposing workflow stages to the interface. Positions and look targets are
+ * interpolated continuously by the camera rig.
  *
- * @typedef {object} SceneStageLayout
- * @property {SceneStageId} id
- * @property {string} label
- * @property {string} accent
+ * @typedef {object} CameraKeyframe
  * @property {[number, number, number]} position
+ * @property {[number, number, number]} target
+ * @property {number} roll
  */
 
-/** @type {readonly SceneStageLayout[]} */
-export const SCENE_STAGE_LAYOUT = Object.freeze([
+/** @type {readonly CameraKeyframe[]} */
+export const CAMERA_KEYFRAMES = Object.freeze([
   {
-    id: "ingest",
-    label: "Ingest",
-    accent: "#F5B942",
-    position: [-5.2, -1.25, -1.1],
+    position: [-0.65, 0.48, 12.4],
+    target: [0.1, 0.1, 0.25],
+    roll: -0.012,
   },
   {
-    id: "retrieve",
-    label: "Retrieve",
-    accent: "#46D7E8",
-    position: [-2.75, 1.45, 0.15],
+    position: [0.15, 0.12, 11.75],
+    target: [-0.5, 0.35, 0.1],
+    roll: 0.008,
   },
   {
-    id: "orchestrate",
-    label: "Orchestrate",
-    accent: "#A78BFA",
-    position: [0, 0, 0.55],
+    position: [0.58, -0.18, 10.95],
+    target: [0.05, 0.12, 0.35],
+    roll: 0.018,
   },
   {
-    id: "validate",
-    label: "Validate",
-    accent: "#46D7E8",
-    position: [2.8, 1.35, -0.05],
+    position: [-0.12, 0.38, 10.35],
+    target: [0.75, -0.12, 0.1],
+    roll: -0.01,
   },
   {
-    id: "deliver",
-    label: "Deliver",
-    accent: "#A78BFA",
-    position: [5.15, -1.1, -1.05],
+    position: [-0.55, -0.05, 9.75],
+    target: [0.1, -0.2, -0.15],
+    roll: -0.022,
   },
 ]);
 
-export const SCENE_STAGE_IDS = Object.freeze(
-  SCENE_STAGE_LAYOUT.map((stage) => stage.id),
-);
-
 /**
- * Resolve caller input without making the scene depend on a specific content
- * schema. Unknown values intentionally fall back to the orchestration core.
- *
- * @param {string | number | undefined | null} activeStage
- * @returns {number}
+ * @param {number} progress
+ * @returns {{lower: CameraKeyframe, upper: CameraKeyframe, mix: number}}
  */
-export function resolveStageIndex(activeStage) {
-  if (typeof activeStage === "number" && Number.isFinite(activeStage)) {
-    return Math.max(0, Math.min(SCENE_STAGE_LAYOUT.length - 1, Math.round(activeStage)));
-  }
+export function resolveCameraSegment(progress) {
+  const normalized = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
+  const scaled = normalized * (CAMERA_KEYFRAMES.length - 1);
+  const lowerIndex = Math.floor(scaled);
+  const upperIndex = Math.min(CAMERA_KEYFRAMES.length - 1, lowerIndex + 1);
+  const linearMix = scaled - lowerIndex;
+  const mix = linearMix * linearMix * (3 - 2 * linearMix);
 
-  const normalized = String(activeStage ?? "").trim().toLowerCase();
-  const index = SCENE_STAGE_LAYOUT.findIndex(
-    (stage) => stage.id === normalized || stage.label.toLowerCase() === normalized,
-  );
-
-  return index >= 0 ? index : 2;
+  return {
+    lower: CAMERA_KEYFRAMES[lowerIndex],
+    upper: CAMERA_KEYFRAMES[upperIndex],
+    mix,
+  };
 }

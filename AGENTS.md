@@ -27,10 +27,11 @@ Repository and live-project evidence take precedence over summaries. If evidence
 
 ## Design and engineering rules
 
-- Follow the **Immersive Hybrid Cosmic AI** direction: cinematic spatial depth and an interactive AI-orchestration universe, not a flat dashboard.
-- Lead with applied AI, backend services, workflow automation, internal tools, and reliable software delivery.
-- Keep all information and controls in semantic DOM. The WebGL canvas is decorative, progressively enhanced, and never required to navigate or understand the page.
-- Stage controls must be native buttons named Ingest, Retrieve, Orchestrate, Validate, and Deliver, with `aria-pressed` exposing the active stage.
+- Follow the **Cinematic Editorial** direction: expressive typography, warm cosmic depth, restrained navigation, and continuous astronaut-led motion rather than an AI dashboard.
+- Lead with dependable software, backend systems, workflow automation, and internal tools. Present applied AI as a current specialization rather than the entire identity.
+- Do not add numbered navigation rails, workflow docks, telemetry readouts, terminal-style labels, status pills, project numbers, or neural-network-style visual clutter.
+- Keep all information and navigation in semantic DOM. The WebGL canvas is decorative, progressively enhanced, and never required to navigate or understand the page.
+- Drive the scene continuously from scroll progress. Camera keyframes are private animation data and must not become visible workflow controls.
 - Respect reduced motion, save-data, unsupported WebGL, context loss, hidden tabs, and offscreen rendering. Fallback content must remain complete.
 - Use native document scrolling, keyboard-operable interactions, accessible names, visible focus, WCAG AA contrast, and a single logical heading hierarchy.
 - Keep the astronaut attribution visible and accurate. Do not add new model, video, remote-font, or stock-art dependencies.

@@ -9,25 +9,58 @@ const VIEWPORTS = [
   { height: 900, width: 1440 },
 ];
 
-test("renders the approved narrative and evidence links", async ({ page }) => {
+const PAGE_SECTION_IDS = [
+  "home",
+  "impact",
+  "work",
+  "practice",
+  "experience",
+  "about",
+  "contact",
+];
+
+test("renders the approved software-first narrative and evidence links", async ({
+  page,
+}) => {
   await page.goto("/");
 
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /I build applied AI systems that turn manual work into dependable software/i,
+      name: "I turn complex workflows into dependable software.",
     }),
   ).toBeVisible();
   await expect(page.getByText(/Germany/i).first()).toBeVisible();
   await expect(
     page.getByText("Software Engineer · Applied AI & Automation · Current"),
   ).toBeVisible();
+  await expect(page.getByText(/backend systems/i).first()).toBeVisible();
+  await expect(page.getByText(/workflow automation/i).first()).toBeVisible();
+  await expect(page.getByText(/internal tools/i).first()).toBeVisible();
+  await expect(
+    page.getByText(/Applied AI is one part of that practice.not the whole story/i),
+  ).toBeVisible();
 
-  const orderedHeadings = await page
-    .locator("h2, h3")
-    .allTextContents();
+  const sectionOrder = await page.evaluate((ids) => {
+    const sections = ids.map((id) => {
+      const section = document.getElementById(id);
+      if (!section) throw new Error(`Missing #${id} section`);
+      return section;
+    });
+    return sections
+      .sort((left, right) => {
+        if (left === right) return 0;
+        return left.compareDocumentPosition(right) & Node.DOCUMENT_POSITION_FOLLOWING
+          ? -1
+          : 1;
+      })
+      .map((section) => section.id);
+  }, PAGE_SECTION_IDS);
+  expect(sectionOrder).toEqual(PAGE_SECTION_IDS);
+
+  const orderedHeadings = await page.locator("h2, h3").allTextContents();
   const positions = [
-    "AI-assisted workflow automation",
+    "A faster path from source material to expert-ready output.",
     "Project Kyber",
     "Tremor Track",
   ].map((heading) =>
@@ -35,6 +68,11 @@ test("renders the approved narrative and evidence links", async ({ page }) => {
   );
   expect(positions.every((position) => position >= 0)).toBeTruthy();
   expect(positions).toEqual([...positions].sort((a, b) => a - b));
+
+  await expect(page.getByText(/Private active R&D/i)).toBeVisible();
+  await expect(page.getByText(/team hackathon project/i)).toBeVisible();
+  await expect(page.getByText(/approximately five minutes/i).last()).toBeVisible();
+  await expect(page.getByText(/Expert review remains/i)).toBeVisible();
 
   await expect(
     page.locator('a[href="https://github.com/dhrubasaha08/tremortrack"]'),
@@ -49,7 +87,7 @@ test("renders the approved narrative and evidence links", async ({ page }) => {
   ).toHaveCount(1);
 });
 
-test("uses landmarks, keyboard-operable stages, and visible focus", async ({
+test("uses a quiet, unnumbered, keyboard-accessible navigation", async ({
   page,
 }) => {
   await page.goto("/");
@@ -58,17 +96,97 @@ test("uses landmarks, keyboard-operable stages, and visible focus", async ({
   await expect(page.getByRole("main")).toHaveAttribute("id", "main-content");
   await expect(page.getByRole("contentinfo")).toBeVisible();
 
-  const retrieve = page.getByRole("button", { name: /^Retrieve$/i });
-  await retrieve.focus();
-  await expect(retrieve).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(retrieve).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".site-header")).toHaveCSS("position", "fixed");
+  const navigation = page.getByRole("navigation", { name: /primary/i });
+  await expect(navigation).toBeVisible();
+  for (const [label, href] of [
+    ["Work", "#work"],
+    ["Experience", "#experience"],
+    ["About", "#about"],
+    ["Contact", "#contact"],
+  ]) {
+    await expect(navigation.getByRole("link", { name: label })).toHaveAttribute(
+      "href",
+      href,
+    );
+  }
+  await expect(navigation).not.toContainText(/\b0[1-9]\b/);
+  await expect(page.locator(".site-progress")).toHaveCount(1);
+  await expect(page.locator(".site-progress")).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
+  await expect(
+    page.locator(
+      ".nav-index, .stage-dock, .stage-narrative, .stage-panel, .project-number, .status-label, .scene-readout, [aria-label='AI workflow stages']",
+    ),
+  ).toHaveCount(0);
+  await expect(page.getByText(/ORBITAL WORKSPACE|SCROLL TO TRAVERSE/i)).toHaveCount(
+    0,
+  );
 
-  const outlineStyle = await retrieve.evaluate((element) => {
+  for (const label of [
+    "Ingest",
+    "Retrieve",
+    "Orchestrate",
+    "Validate",
+    "Deliver",
+  ]) {
+    await expect(page.getByRole("button", { name: label })).toHaveCount(0);
+  }
+
+  const workLink = navigation.getByRole("link", { name: "Work" });
+  await workLink.focus();
+  await expect(workLink).toBeFocused();
+  const outlineStyle = await workLink.evaluate((element) => {
     const style = getComputedStyle(element);
     return `${style.outlineStyle} ${style.outlineWidth} ${style.boxShadow}`;
   });
   expect(outlineStyle).not.toMatch(/^none 0px none$/);
+
+  const projectStatusStyle = await page.locator(".project-status").first().evaluate(
+    (element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        borderRadius: style.borderRadius,
+        borderStyle: style.borderTopStyle,
+      };
+    },
+  );
+  expect(projectStatusStyle).toEqual({
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    borderRadius: "0px",
+    borderStyle: "none",
+  });
+});
+
+test("keeps the compact mobile navigation visible without a menu control", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto("/");
+
+  await expect(page.locator(".brand-short")).toBeVisible();
+  await expect(page.locator(".nav-label-mobile", { hasText: "Career" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /menu|navigation/i })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: /primary/i })).toBeVisible();
+});
+
+test("has no retired career or confidential copy in rendered content", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const renderedText = await page.locator("body").innerText();
+  const renderedMarkup = await page.locator("body").innerHTML();
+
+  expect(renderedText).not.toMatch(
+    /Arduino|DHT11|TFminiS|SimpleUltrasonic|Zephyr|\bIoT\b|embedded systems?|electronics?|electrical|\bsensors?\b|\bhardware\b|Microsoft Planner|TensorFlow/i,
+  );
+  expect(renderedText).not.toMatch(
+    /salary|compensation|visa|immigration|passport|residence.?permit|medical|mental health|health information|insurance|customer data|customer count|conversion rate|financial projection|proprietary prompt/i,
+  );
+  expect(renderedMarkup).not.toMatch(/getform\.io|dropbox\.com|linkedin\.com/i);
 });
 
 test("has no detectable browser accessibility violations", async ({ page }) => {
@@ -136,11 +254,20 @@ test.describe("progressive 3D fallbacks", () => {
       "unsupported",
     );
     await expect(page.getByRole("main")).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "I turn complex workflows into dependable software.",
+      }),
+    ).toBeVisible();
   });
 
   test("recovers to static content after WebGL context loss", async ({ page }) => {
     await page.goto("/");
     const scene = page.locator("[data-scene-mode]");
+    await expect
+      .poll(() => scene.getAttribute("data-scene-mode"), { timeout: 10_000 })
+      .toMatch(/interactive|unsupported|failed/);
     const mode = await scene.getAttribute("data-scene-mode");
     test.skip(mode !== "interactive", "WebGL2 is unavailable in this browser environment.");
 

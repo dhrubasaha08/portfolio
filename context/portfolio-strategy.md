@@ -1,37 +1,36 @@
-# Immersive Portfolio Strategy
+# Cinematic Editorial Portfolio Strategy
 
 ## Objective
 
-Position Dhruba Saha as a **Software Engineer focused on applied AI, backend automation, and internal tools**. The homepage is for engineering and product leaders evaluating production-oriented AI, backend, automation, integration, developer-tooling, and internal-platform work.
+Position Dhruba Saha as a **software engineer who turns complex workflows into dependable software**. The homepage is for engineering and product leaders evaluating backend systems, automation, internal tools, applied AI, and product-oriented delivery.
 
 ## Visual direction
 
-The experience should recover the memorable depth of the previous cosmic portfolio while making the subject unmistakably current: an astronaut travels through an orbital AI-orchestration system as signals move through Ingest, Retrieve, Orchestrate, Validate, and Deliver.
+The experience should preserve the memorable astronaut, depth, and motion of the cosmic portfolio while feeling authored, editorial, and human rather than generated from AI-dashboard conventions.
 
-- Use cinematic scale, spatial layering, atmospheric light, restrained particles, and oversized typography.
-- Use the astronaut as a narrative explorer inside the system, not as unrelated decoration.
-- Avoid dashboard grids, repetitive cards, generic technology badges, stock imagery, and external fonts.
-- Use space `#030712`, deep navy `#07111F`, telemetry cyan `#46D7E8`, semantic violet `#A78BFA`, event amber `#F5B942`, text `#EAF2F8`, and muted text `#93A4B7`.
-- Preserve content and navigation as semantic DOM over a decorative lazy-loaded WebGL layer.
+- Use cinematic scale, generous negative space, expressive typography, atmospheric light, and continuous scroll choreography.
+- Keep the astronaut as the narrative explorer inside a celestial field of stars, dust, orbital curves, and restrained light trails.
+- Avoid numbered rails, workflow buttons, telemetry readouts, terminal labels, status pills, grid-heavy cards, neural-node diagrams, generic badges, stock imagery, and external fonts.
+- Use canvas `#05070B`, surface `#0B1118`, moonlight `#F3EFE7`, smoke `#9DA4AD`, ember `#F26A3D`, and muted teal `#3BA39A`.
+- Use system sans typography with restrained system-serif accents. Preserve semantic DOM over a decorative lazy-loaded WebGL layer.
 
 ## Information architecture
 
-1. Immersive hero: identity, approved headline, concise current-work summary, and Explore current work / Contact actions.
-2. Current systems impact: AI-assisted workflow, orchestration and retrieval approach, retained expert review, and approved outcome.
-3. What I build now: backend services and APIs, retrieval and context systems, workflow orchestration, internal tools, and dependable delivery.
-4. Project Kyber: unlinked Private active R&D thesis.
-5. Tremor Track: earlier team hackathon project with public evidence.
-6. Experience: dominant current role and compact 2023 software/infrastructure internship.
-7. Capabilities, About/Photography, and direct Contact.
+1. Hero: identity, software-first headline, current-work summary, and selected-work/contact actions.
+2. Current impact: sanitized workflow story, retained expert review, and approved approximately-eight-hours-to-approximately-five-minutes result.
+3. Selected work: Project Kyber as private active R&D and Tremor Track as earlier team software work.
+4. Practice: backend systems, workflow automation, internal tools, and applied AI.
+5. Experience: dominant current role and compact 2023 software/infrastructure internship.
+6. About/Photography and direct Contact.
 
 ## Content balance
 
-- **85%:** current applied AI, backend automation, internal tools, APIs, retrieval, orchestration, and reliable delivery.
-- **10%:** private current R&D and developer tooling.
-- **5%:** earlier software/infrastructure experience, Tremor Track, and photography.
+- **70%:** dependable software, backend systems, automation, internal tools, integrations, and delivery.
+- **20%:** applied AI, retrieval, structured outputs, validation, and developer-tooling research.
+- **10%:** earlier software/infrastructure experience, Tremor Track, and photography.
 
 ## Release standard
 
-The first screen must communicate Dhruba's name, software-engineering identity, Germany location, and applied-AI focus before the 3D scene loads. Every interaction needs a keyboard-equivalent DOM control, and every claim needs an approved statement or public source.
+The first screen must communicate Dhruba's name, software-engineering identity, Germany location, and current focus before the 3D scene loads. Navigation and links must remain keyboard accessible, while scene motion stays decorative and continuously driven by scroll.
 
 The scene is an enhancement, not a gate. Reduced motion, save-data mode, unsupported WebGL, context loss, and mobile constraints must all produce a complete static experience. Asset budgets and live-browser accessibility checks are enforced by `npm run check`.
