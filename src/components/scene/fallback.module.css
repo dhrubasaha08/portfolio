@@ -1,0 +1,113 @@
+.fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #101a2e;
+  pointer-events: none;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.skywash,
+.paperGrain,
+.vignette,
+.layer {
+  position: absolute;
+  inset: -3%;
+  width: 106%;
+  height: 106%;
+}
+
+.skywash {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 78% 20%, rgb(214 104 60 / 15%), transparent 29%),
+    radial-gradient(circle at 18% 64%, rgb(111 168 200 / 12%), transparent 36%),
+    #101a2e;
+}
+
+.layer {
+  display: block;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  transition: opacity 240ms ease;
+  will-change: transform;
+}
+
+.stars {
+  z-index: 1;
+  transform: translate3d(var(--stars-x), var(--stars-y), 0) scale(1.07);
+}
+
+.planets {
+  z-index: 2;
+  transform: translate3d(var(--planets-x), var(--planets-y), 0) scale(1.075);
+}
+
+.sun {
+  z-index: 3;
+  transform: translate3d(var(--sun-x), var(--sun-y), 0) scale(1.07);
+}
+
+.farMountain {
+  z-index: 4;
+  transform: translate3d(var(--far-x), var(--far-y), 0) scale(1.075);
+}
+
+.nearMountain {
+  z-index: 5;
+  transform: translate3d(var(--near-x), var(--near-y), 0) scale(1.08);
+}
+
+.crater {
+  z-index: 6;
+  transform: translate3d(var(--crater-x), var(--crater-y), 0) scale(1.085);
+}
+
+.paperGrain {
+  z-index: 7;
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.52'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.vignette {
+  z-index: 8;
+  background:
+    linear-gradient(90deg, rgb(10 13 20 / 44%), transparent 47% 72%, rgb(10 13 20 / 18%)),
+    linear-gradient(180deg, rgb(10 13 20 / 16%), transparent 38%, rgb(10 13 20 / 42%));
+  pointer-events: none;
+}
+
+@media (max-width: 47.99rem) {
+  .skywash,
+  .paperGrain,
+  .vignette,
+  .layer {
+    inset: -6%;
+    width: 112%;
+    height: 112%;
+  }
+
+  .layer {
+    object-position: 61% center;
+  }
+
+  .vignette {
+    background:
+      linear-gradient(180deg, rgb(10 13 20 / 18%), transparent 42%, rgb(10 13 20 / 54%)),
+      linear-gradient(90deg, rgb(10 13 20 / 30%), transparent 72%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    transform: scale(1.075);
+    transition: none;
+    will-change: auto;
+  }
+}

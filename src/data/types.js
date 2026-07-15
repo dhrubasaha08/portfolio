@@ -1,0 +1,56 @@
+/**
+ * @typedef {Object} EvidenceLink
+ * @property {string} label
+ * @property {string} href
+ * @property {"repository" | "live-demo" | "project-page" | "source" | "license" | "profile" | "email"} kind
+ * @property {boolean} external
+ */
+
+/**
+ * @typedef {Object} CaseStudy
+ * @property {string} id
+ * @property {string} title
+ * @property {string} status
+ * @property {"private-rnd" | "public"} visibility
+ * @property {string} summary
+ * @property {string} contribution
+ * @property {string} outcome
+ * @property {readonly EvidenceLink[]} evidence
+ */
+
+/**
+ * @typedef {Object} ExperienceEntry
+ * @property {string} id
+ * @property {string} role
+ * @property {string=} organization
+ * @property {string=} period
+ * @property {string} location
+ * @property {string} summary
+ * @property {readonly string[]} highlights
+ * @property {boolean} current
+ */
+
+/**
+ * @typedef {Object} PracticeStatement
+ * @property {string} id
+ * @property {string} title
+ * @property {string} body
+ */
+
+/**
+ * @typedef {Object} NavItem
+ * @property {string} label
+ * @property {string=} mobileLabel
+ * @property {string} href
+ */
+
+/**
+ * @typedef {Object} ContactLink
+ * @property {string} label
+ * @property {string} value
+ * @property {string} href
+ * @property {"email" | "profile"} kind
+ * @property {boolean} external
+ */
+
+export {};

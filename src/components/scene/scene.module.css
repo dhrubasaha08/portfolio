@@ -1,0 +1,41 @@
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  touch-action: pan-y;
+  transition: opacity 600ms ease;
+  contain: layout paint style;
+}
+
+.ready {
+  opacity: 1;
+}
+
+.canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  touch-action: pan-y !important;
+}
+
+.scene::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: radial-gradient(circle at 72% 38%, rgb(214 104 60 / 7%), transparent 30%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene {
+    display: none;
+    transition: none;
+  }
+}
