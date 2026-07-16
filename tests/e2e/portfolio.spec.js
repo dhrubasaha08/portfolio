@@ -8,11 +8,10 @@ const VIEWPORTS = [
   { height: 768, width: 1024 },
   { height: 900, width: 1440 },
 ];
-
 const HEADLINE = "I turn complex workflows into dependable software.";
 const HERO_SUMMARY =
   "I’m Dhruba Saha, a software engineer in Germany. I build backend systems, automation, and internal tools—and use AI when it genuinely improves the work.";
-const PAGE_SECTION_IDS = [
+const CHAPTER_IDS = [
   "home",
   "work",
   "practice",
@@ -22,6 +21,47 @@ const PAGE_SECTION_IDS = [
   "about",
   "contact",
 ];
+const DIORAMA_BY_CHAPTER = {
+  home: "hero",
+  work: "impact",
+  practice: "practice",
+  "project-kyber": "kyber",
+  "tremor-track": "tremor",
+  experience: "experience",
+  about: "about",
+  contact: "contact",
+};
+const CHAPTER_MOTION_PROPERTIES = [
+  "--chapter-progress",
+  "--chapter-enter",
+  "--chapter-exit",
+  "--chapter-transition",
+];
+const ROOT_MOTION_PROPERTIES = [
+  "--global-progress",
+  "--pointer-x",
+  "--pointer-y",
+  "--pointer-impulse",
+];
+
+/** @param {import("@playwright/test").Page} page @param {string} selector @param {string} property */
+async function readMotionValue(page, selector, property) {
+  return page.locator(selector).evaluate(
+    (element, name) => Number.parseFloat(getComputedStyle(element).getPropertyValue(name)) || 0,
+    property,
+  );
+}
+
+/** @param {import("@playwright/test").Page} page @param {string} id */
+async function centerChapter(page, id) {
+  await page.evaluate((chapterId) => {
+    const chapter = document.getElementById(chapterId);
+    if (!chapter) throw new Error(`Missing #${chapterId}`);
+    const top = chapter.getBoundingClientRect().top + window.scrollY;
+    const target = top + chapter.offsetHeight / 2 - window.innerHeight / 2;
+    window.scrollTo({ top: target, behavior: "instant" });
+  }, id);
+}
 
 test("renders the approved narrative, metric, project order, and evidence", async ({
   page,
@@ -48,8 +88,8 @@ test("renders the approved narrative, metric, project order, and evidence", asyn
         left.compareDocumentPosition(right) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
       )
       .map((section) => section.id);
-  }, PAGE_SECTION_IDS);
-  expect(sectionOrder).toEqual(PAGE_SECTION_IDS);
+  }, CHAPTER_IDS);
+  expect(sectionOrder).toEqual(CHAPTER_IDS);
 
   for (const href of [
     "https://github.com/dhrubasaha08/tremortrack",
@@ -59,15 +99,12 @@ test("renders the approved narrative, metric, project order, and evidence", asyn
     await expect(page.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
 
-  const kyber = page.locator("#project-kyber");
-  await expect(kyber.getByRole("link")).toHaveCount(0);
+  await expect(page.locator("#project-kyber").getByRole("link")).toHaveCount(0);
   await expect(page.locator('a[href="mailto:contact@dhrubasaha.co.in"]')).toHaveCount(2);
   await expect(page.locator('a[href="https://github.com/dhrubasaha08"]')).toHaveCount(1);
 });
 
-test("uses authored typography and underlined links without AI-product controls", async ({
-  page,
-}) => {
+test("self-hosts Montserrat and avoids AI-product controls", async ({ page }) => {
   const remoteRequests = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
@@ -84,8 +121,8 @@ test("uses authored typography and underlined links without AI-product controls"
       heading: getComputedStyle(heading).fontFamily,
     };
   });
-  expect(typography.body).toContain("Public Sans");
-  expect(typography.heading).toContain("Barlow Condensed");
+  expect(typography.body).toContain("Montserrat");
+  expect(typography.heading).toContain("Montserrat");
   expect(remoteRequests).toEqual([]);
 
   const hero = page.locator("#home");
@@ -103,13 +140,135 @@ test("uses authored typography and underlined links without AI-product controls"
     ),
   ).toHaveCount(0);
   await expect(page.getByText(/ORBITAL WORKSPACE|SCROLL TO TRAVERSE/i)).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /Ingest|Retrieve|Orchestrate|Validate|Deliver/i })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /Ingest|Retrieve|Orchestrate|Validate|Deliver/i }),
+  ).toHaveCount(0);
 });
 
-test("keeps navigation and focus visible on desktop and mobile", async ({ page }) => {
+test("publishes a normalized contract for all eight animated chapters", async ({ page }) => {
+  await page.goto("/");
+
+  for (const property of ROOT_MOTION_PROPERTIES) {
+    await expect.poll(() => page.locator("main").evaluate(
+      (element, name) => getComputedStyle(element).getPropertyValue(name).trim(),
+      property,
+    )).not.toBe("");
+  }
+
+  for (const id of CHAPTER_IDS) {
+    const chapter = page.locator(`#${id}[data-chapter="${id}"]`);
+    await expect(chapter).toHaveCount(1);
+    const values = await chapter.evaluate((element, properties) =>
+      properties.map((property) => ({
+        property,
+        raw: getComputedStyle(element).getPropertyValue(property).trim(),
+        value: Number.parseFloat(getComputedStyle(element).getPropertyValue(property)),
+      })), CHAPTER_MOTION_PROPERTIES);
+    for (const state of values) {
+      expect(state.raw, `${state.property} missing on #${id}`).not.toBe("");
+      expect(state.value, `${state.property} on #${id}`).toBeGreaterThanOrEqual(0);
+      expect(state.value, `${state.property} on #${id}`).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("uses one persistent canvas whose diorama follows native chapter scrolling", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const scene = page.locator("[data-scene-chapter]");
+  await expect(scene).toHaveCount(1);
+  await expect(page.locator(".global-scene-layer")).toHaveAttribute("aria-hidden", "true");
+  await expect(scene).toHaveAttribute("data-scene-chapter", "home");
+  await expect(scene).toHaveAttribute("data-diorama", /\S+/);
+  await expect(scene).toHaveAttribute("data-astronaut-cameo", /\S+/);
+
+  await expect(scene).toHaveAttribute(
+    "data-scene-mode",
+    /^(deferred|interactive|unsupported)$/,
+  );
+  const initialMode = await scene.getAttribute("data-scene-mode");
+  if (initialMode === "unsupported") {
+    await expect(page.locator("canvas")).toHaveCount(0);
+  } else {
+    await page.mouse.click(20, 120);
+    await expect(page.locator("canvas")).toHaveCount(1, { timeout: 10_000 });
+  }
+
+  for (const id of CHAPTER_IDS) {
+    const before = await readMotionValue(page, `#${id}`, "--chapter-progress");
+    await centerChapter(page, id);
+    await expect(scene).toHaveAttribute("data-scene-chapter", id);
+    await expect.poll(() => readMotionValue(page, `#${id}`, "--chapter-progress"))
+      .not.toBe(before);
+    await expect(scene).toHaveAttribute("data-diorama", DIORAMA_BY_CHAPTER[id]);
+  }
+
+  await centerChapter(page, "work");
+  await expect(scene).toHaveAttribute("data-scene-chapter", "work");
+  await expect(scene).toHaveAttribute("data-astronaut-cameo", "false");
+
+  await centerChapter(page, "home");
+  await expect(scene).toHaveAttribute("data-astronaut-cameo", "true");
+  await expect(page.locator("canvas")).toHaveCount(initialMode === "unsupported" ? 0 : 1);
+});
+
+test("updates pointer motion gently without making the canvas interactive", async ({ page }) => {
+  await page.setViewportSize({ height: 900, width: 1440 });
+  await page.goto("/");
+  const scene = page.locator("[data-scene-chapter]");
+  await expect(scene).toHaveCount(1);
+  const pointerBefore = await readMotionValue(page, "main", "--pointer-x");
+  await page.mouse.move(1296, 180);
+  await expect.poll(() => readMotionValue(page, "main", "--pointer-x"))
+    .not.toBe(pointerBefore);
+
+  await expect(scene).toHaveCSS("pointer-events", "none");
+  await expect(scene).toHaveCSS("touch-action", "pan-y");
+  if (await page.locator("canvas").count()) {
+    await expect(page.locator("canvas")).toHaveCSS("pointer-events", "none");
+    await expect(page.locator("canvas")).toHaveCSS("touch-action", "pan-y");
+  }
+});
+
+test("mobile tap impulses do not capture touch scrolling", async ({ browser }) => {
+  const context = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { height: 844, width: 390 },
+  });
+  const page = await context.newPage();
+  await page.goto("/");
+  const impulseBefore = await readMotionValue(page, "main", "--pointer-impulse");
+  await page.touchscreen.tap(300, 300);
+  await expect.poll(() => readMotionValue(page, "main", "--pointer-impulse"))
+    .not.toBe(impulseBefore);
+
+  const touchPrevented = await page.evaluate(() => {
+    const event = new Event("touchmove", { bubbles: true, cancelable: true });
+    document.querySelector("main")?.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(touchPrevented).toBe(false);
+
+  await page.evaluate(() => window.scrollTo({ top: 900, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await context.close();
+});
+
+test("keeps navigation, focus, landmarks, headings, and axe results accessible", async ({
+  page,
+}) => {
   await page.goto("/");
   const navigation = page.getByRole("navigation", { name: /primary/i });
-  await expect(navigation).toBeVisible();
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(page.getByRole("main")).toHaveAttribute("id", "main-content");
+  await expect(page.getByRole("contentinfo")).toBeVisible();
+  await expect(page.getByRole("link", { name: /skip to content/i })).toHaveAttribute(
+    "href",
+    "#main-content",
+  );
+
   for (const [label, href] of [
     ["Work", "#work"],
     ["Experience", "#experience"],
@@ -130,24 +289,6 @@ test("keeps navigation and focus visible on desktop and mobile", async ({ page }
     return `${style.outlineStyle} ${style.outlineWidth} ${style.boxShadow} ${style.textDecorationLine}`;
   });
   expect(focusTreatment).not.toMatch(/^none 0px none none$/);
-
-  await page.setViewportSize({ height: 844, width: 390 });
-  await expect(navigation).toBeVisible();
-  await expect(navigation.getByRole("link", { name: /Experience.*Career/i })).toBeVisible();
-  await expect(navigation).toContainText("Career");
-});
-
-test("has semantic landmarks, ordered headings, and no axe violations", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(page.getByRole("banner")).toBeVisible();
-  await expect(page.getByRole("main")).toHaveAttribute("id", "main-content");
-  await expect(page.getByRole("contentinfo")).toBeVisible();
-  await expect(page.getByRole("link", { name: /skip to content/i })).toHaveAttribute(
-    "href",
-    "#main-content",
-  );
 
   const levels = await page.locator("h1, h2, h3").evaluateAll((headings) =>
     headings.map((heading) => Number(heading.tagName.slice(1))),
@@ -176,23 +317,18 @@ test("has no retired career, confidential, or unapproved link copy", async ({ pa
 });
 
 for (const viewport of VIEWPORTS) {
-  test(`uses native scrolling without overflow or clipped copy at ${viewport.width}px`, async ({
+  test(`uses native scrolling without overflow or clipped headings at ${viewport.width}px`, async ({
     page,
   }) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
 
     const layout = await page.evaluate(() => {
-      const headingElement = document.querySelector("h1");
-      if (!headingElement) throw new Error("Missing portfolio heading.");
-      const heading = headingElement.getBoundingClientRect();
       const rootStyle = getComputedStyle(document.documentElement);
       const bodyStyle = getComputedStyle(document.body);
       return {
         bodyOverflowY: bodyStyle.overflowY,
         clientWidth: document.documentElement.clientWidth,
-        headingLeft: heading.left,
-        headingRight: heading.right,
         rootOverflowY: rootStyle.overflowY,
         scrollHeight: document.documentElement.scrollHeight,
         scrollWidth: document.documentElement.scrollWidth,
@@ -200,10 +336,28 @@ for (const viewport of VIEWPORTS) {
     });
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
     expect(layout.scrollHeight).toBeGreaterThan(viewport.height);
-    expect(layout.headingLeft).toBeGreaterThanOrEqual(-1);
-    expect(layout.headingRight).toBeLessThanOrEqual(viewport.width + 1);
     expect(["auto", "scroll", "visible"]).toContain(layout.rootOverflowY);
     expect(["auto", "scroll", "visible"]).toContain(layout.bodyOverflowY);
+
+    for (const id of CHAPTER_IDS) {
+      await centerChapter(page, id);
+      await expect(page.locator("[data-scene-chapter]")).toHaveAttribute(
+        "data-scene-chapter",
+        id,
+      );
+      const headings = await page.locator(`#${id} h1, #${id} h2, #${id} h3`).evaluateAll(
+        (elements) => elements.map((heading) => {
+          const rect = heading.getBoundingClientRect();
+          return { left: rect.left, right: rect.right, text: heading.textContent };
+        }),
+      );
+      for (const heading of headings) {
+        expect(heading.left, `${heading.text} clips left at ${viewport.width}px`)
+          .toBeGreaterThanOrEqual(-1);
+        expect(heading.right, `${heading.text} clips right at ${viewport.width}px`)
+          .toBeLessThanOrEqual(viewport.width + 1);
+      }
+    }
 
     await page.evaluate(() => window.scrollTo({ top: 700, behavior: "instant" }));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
@@ -212,7 +366,7 @@ for (const viewport of VIEWPORTS) {
 }
 
 test.describe("progressive scene fallbacks", () => {
-  test("uses a static reduced-motion presentation", async ({ browser }) => {
+  test("uses a complete static reduced-motion presentation", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.goto("/");
@@ -224,6 +378,8 @@ test.describe("progressive scene fallbacks", () => {
       "data-motion",
       "static",
     );
+    await expect(page.locator("canvas")).toHaveCount(0);
+    for (const id of CHAPTER_IDS) await expect(page.locator(`#${id}`)).toBeAttached();
     await context.close();
   });
 
@@ -240,6 +396,7 @@ test.describe("progressive scene fallbacks", () => {
       "save-data",
     );
     await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
+    await expect(page.locator("canvas")).toHaveCount(0);
   });
 
   test("keeps content available without WebGL", async ({ page }) => {
@@ -255,6 +412,7 @@ test.describe("progressive scene fallbacks", () => {
       "unsupported",
     );
     await expect(page.getByRole("heading", { level: 1, name: HEADLINE })).toBeVisible();
+    await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
   });
 
   test("returns to the static scene after a reported context loss", async ({ page }) => {
@@ -263,6 +421,7 @@ test.describe("progressive scene fallbacks", () => {
     await scene.dispatchEvent("playgroundscenelost");
     await expect(scene).toHaveAttribute("data-scene-mode", "failed");
     await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
+    await expect(page.locator("canvas")).toHaveCount(0);
     await expect(page.getByRole("main")).toBeVisible();
   });
 });

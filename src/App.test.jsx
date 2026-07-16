@@ -1,6 +1,6 @@
 import axe from "axe-core";
 import { existsSync, readFileSync } from "node:fs";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +9,7 @@ import App from "./App";
 const HEADLINE = "I turn complex workflows into dependable software.";
 const HERO_SUMMARY =
   "I’m Dhruba Saha, a software engineer in Germany. I build backend systems, automation, and internal tools—and use AI when it genuinely improves the work.";
-const PAGE_SECTION_IDS = [
+const CHAPTER_IDS = [
   "home",
   "work",
   "practice",
@@ -18,6 +18,18 @@ const PAGE_SECTION_IDS = [
   "experience",
   "about",
   "contact",
+];
+const CHAPTER_MOTION_PROPERTIES = [
+  "--chapter-progress",
+  "--chapter-enter",
+  "--chapter-exit",
+  "--chapter-transition",
+];
+const ROOT_MOTION_PROPERTIES = [
+  "--global-progress",
+  "--pointer-x",
+  "--pointer-y",
+  "--pointer-impulse",
 ];
 const VERIFIED_LINKS = [
   "https://github.com/dhrubasaha08/tremortrack",
@@ -39,7 +51,7 @@ function expectDocumentOrder(elements) {
   }
 }
 
-describe("portfolio content", () => {
+describe("approved portfolio narrative", () => {
   it("leads with the approved direct software-first positioning", () => {
     const { container } = renderPortfolio();
 
@@ -51,9 +63,10 @@ describe("portfolio content", () => {
     expect(heroSection).toHaveTextContent(/Germany/i);
     expect(screen.getByText(HERO_SUMMARY, { exact: true })).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("link", { name: /See current work/i }),
-    ).toHaveAttribute("href", "#work");
+    expect(screen.getByRole("link", { name: /See current work/i })).toHaveAttribute(
+      "href",
+      "#work",
+    );
     expect(screen.getByRole("link", { name: /Contact me/i })).toHaveAttribute(
       "href",
       "mailto:contact@dhrubasaha.co.in",
@@ -62,9 +75,9 @@ describe("portfolio content", () => {
     expect(container).toHaveTextContent(/Current/i);
   });
 
-  it("presents the approved story and projects in order", () => {
+  it("keeps the approved story, metric, and projects in order", () => {
     const { container } = renderPortfolio();
-    const sections = PAGE_SECTION_IDS.map((id) => {
+    const sections = CHAPTER_IDS.map((id) => {
       const section = container.querySelector(`#${id}`);
       expect(section, `Missing #${id} section`).toBeTruthy();
       return /** @type {HTMLElement} */ (section);
@@ -96,8 +109,9 @@ describe("portfolio content", () => {
       expect(link).toHaveAccessibleName();
     }
 
-    const kyberHeading = screen.getByRole("heading", { name: /^Project Kyber$/i });
-    const kyberSection = kyberHeading.closest("section");
+    const kyberSection = screen
+      .getByRole("heading", { name: /^Project Kyber$/i })
+      .closest("section");
     expect(kyberSection).toBeTruthy();
     expect(within(/** @type {HTMLElement} */ (kyberSection)).queryByRole("link"))
       .not.toBeInTheDocument();
@@ -110,19 +124,11 @@ describe("portfolio content", () => {
     );
   });
 
-  it("avoids AI-dashboard and generic product-card presentation", () => {
+  it("omits retired career, confidential claims, and AI-dashboard controls", () => {
     const { container } = renderPortfolio();
     const navigation = screen.getByRole("navigation", { name: /primary/i });
-
-    for (const [label, href] of [
-      ["Work", "#work"],
-      ["Experience", "#experience"],
-      ["About", "#about"],
-      ["Contact", "#contact"],
-    ]) {
-      expect(within(navigation).getByRole("link", { name: new RegExp(label, "i") }))
-        .toHaveAttribute("href", href);
-    }
+    const renderedText = container.textContent ?? "";
+    const renderedMarkup = container.innerHTML;
 
     expect(navigation).not.toHaveTextContent(/\b0[1-9]\b/);
     expect(container.querySelector("button")).not.toBeInTheDocument();
@@ -131,31 +137,7 @@ describe("portfolio content", () => {
         '[class*="card"], [class*="pill"], [class*="glass"], [class*="dashboard"], [class*="telemetry"], [class*="stage-dock"], [class*="nav-index"], [class*="project-number"]',
       ),
     ).not.toBeInTheDocument();
-    expect(container).not.toHaveTextContent(/ORBITAL WORKSPACE|SCROLL TO TRAVERSE/i);
-    for (const stage of ["Ingest", "Retrieve", "Orchestrate", "Validate", "Deliver"]) {
-      expect(screen.queryByRole("button", { name: stage })).not.toBeInTheDocument();
-    }
-  });
-
-  it("keeps the first-paint shell, fonts, and metadata aligned", () => {
-    const indexHtml = readFileSync("index.html", "utf8");
-    const stylesheet = readFileSync("src/index.css", "utf8");
-
-    expect(indexHtml).toContain(HEADLINE);
-    expect(indexHtml).toContain('content="#101A2E"');
-    expect(indexHtml).toContain('rel="canonical" href="https://dhrubasaha.co.in/"');
-    expect(stylesheet).toMatch(/@font-face[\s\S]*Barlow Condensed/i);
-    expect(stylesheet).toMatch(/@font-face[\s\S]*Public Sans/i);
-    expect(stylesheet).not.toMatch(/url\(["']?https?:\/\//i);
-    expect(existsSync("public/fonts/BARLOW-LICENSE.txt")).toBe(true);
-    expect(existsSync("public/fonts/PUBLIC-SANS-LICENSE.txt")).toBe(true);
-  });
-
-  it("omits retired career and confidential claims", () => {
-    const { container } = renderPortfolio();
-    const renderedText = container.textContent ?? "";
-    const renderedMarkup = container.innerHTML;
-
+    expect(renderedText).not.toMatch(/ORBITAL WORKSPACE|SCROLL TO TRAVERSE/i);
     expect(renderedText).not.toMatch(
       /Arduino|DHT11|TFminiS|SimpleUltrasonic|Zephyr|\bIoT\b|embedded systems?|electronics?|electrical|\bsensors?\b|\bhardware\b|Microsoft Planner|TensorFlow/i,
     );
@@ -169,7 +151,72 @@ describe("portfolio content", () => {
   });
 });
 
-describe("portfolio semantics and interaction", () => {
+describe("animated chapter contract", () => {
+  it("registers every ordered section as a chapter with normalized motion values", async () => {
+    const { container } = renderPortfolio();
+
+    await waitFor(() => {
+      for (const id of CHAPTER_IDS) {
+        const chapter = /** @type {HTMLElement} */ (
+          container.querySelector(`#${id}[data-chapter="${id}"]`)
+        );
+        expect(chapter, `Missing data-chapter contract for #${id}`).toBeTruthy();
+        for (const property of CHAPTER_MOTION_PROPERTIES) {
+          expect(
+            chapter.style.getPropertyValue(property),
+            `Missing ${property} on #${id}`,
+          ).not.toBe("");
+        }
+      }
+    });
+  });
+
+  it("publishes one global motion root and one persistent scene boundary", async () => {
+    const { container } = renderPortfolio();
+    const main = screen.getByRole("main");
+    await waitFor(() => {
+      for (const property of ROOT_MOTION_PROPERTIES) {
+        expect(main.style.getPropertyValue(property), `Missing ${property} on main`).not.toBe("");
+      }
+    });
+
+    const scenes = container.querySelectorAll("[data-scene-chapter]");
+    expect(scenes).toHaveLength(1);
+    expect(scenes[0]).toHaveAttribute("data-scene-chapter", "home");
+    expect(scenes[0]).toHaveAttribute("data-diorama", "hero");
+    expect(scenes[0]).toHaveAttribute("data-astronaut-cameo", "true");
+  });
+
+  it("keeps animation decorative and semantic content outside the scene", () => {
+    const { container } = renderPortfolio();
+    const scene = container.querySelector("[data-scene-chapter]");
+    const sceneLayer = container.querySelector(".global-scene-layer");
+    expect(sceneLayer).toHaveAttribute("aria-hidden", "true");
+    expect(sceneLayer).toContainElement(/** @type {HTMLElement} */ (scene));
+    expect(scene?.contains(screen.getByRole("heading", { level: 1, name: HEADLINE })))
+      .toBe(false);
+    expect(scene?.contains(screen.getByRole("navigation", { name: /primary/i })))
+      .toBe(false);
+  });
+});
+
+describe("typography, semantics, and accessibility", () => {
+  it("self-hosts Montserrat and keeps first-paint metadata aligned", () => {
+    const indexHtml = readFileSync("index.html", "utf8");
+    const stylesheet = readFileSync("src/index.css", "utf8");
+
+    expect(indexHtml).toContain(HEADLINE);
+    expect(indexHtml).toContain('content="#101A2E"');
+    expect(indexHtml).toContain('rel="canonical" href="https://dhrubasaha.co.in/"');
+    expect(stylesheet).toMatch(/@font-face[\s\S]*Montserrat/i);
+    expect(stylesheet).not.toMatch(/Barlow Condensed|Public Sans/i);
+    expect(stylesheet).not.toMatch(/url\(["']?https?:\/\//i);
+    expect(existsSync("public/fonts/montserrat-variable.woff2")).toBe(true);
+    expect(existsSync("public/fonts/MONTSERRAT-LICENSE.txt")).toBe(true);
+    expect(existsSync("public/fonts/barlow-condensed-600.woff2")).toBe(false);
+    expect(existsSync("public/fonts/public-sans-variable.woff2")).toBe(false);
+  });
+
   it("provides semantic landmarks, ordered headings, and a skip link", () => {
     const { container } = renderPortfolio();
 

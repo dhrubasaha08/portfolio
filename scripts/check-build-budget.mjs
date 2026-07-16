@@ -10,7 +10,29 @@ const ASTRONAUT_MAX = 1.3 * 1024 * 1024;
 const LAZY_3D_TRANSFER_MAX = 1.55 * 1024 * 1024;
 const FONT_AND_ILLUSTRATION_MAX = 300 * 1024;
 const FONT_EXTENSIONS = new Set([".otf", ".ttf", ".woff", ".woff2"]);
-const FORBIDDEN_EXTENSIONS = new Set([".bin", ".gltf", ".mp4", ".webm"]);
+const FORBIDDEN_EXTENSIONS = new Set([
+  ".apng",
+  ".avif",
+  ".basis",
+  ".bin",
+  ".bmp",
+  ".exr",
+  ".gif",
+  ".gltf",
+  ".hdr",
+  ".jpeg",
+  ".jpg",
+  ".ktx2",
+  ".m4v",
+  ".mov",
+  ".mp4",
+  ".ogv",
+  ".png",
+  ".tif",
+  ".tiff",
+  ".webm",
+  ".webp",
+]);
 
 /**
  * @param {string} directory
@@ -90,7 +112,7 @@ const forbidden = assets.filter((asset) =>
 const fontsAndIllustrations = assets.filter(
   (asset) =>
     FONT_EXTENSIONS.has(asset.extension) ||
-    (asset.extension === ".svg" && asset.relativePath.startsWith("parallax/")),
+    asset.extension === ".svg",
 );
 
 if (!mainJavaScript) {
@@ -163,7 +185,7 @@ const fontAndIllustrationBytes = fontsAndIllustrations.reduce(
 );
 if (fontAndIllustrationBytes > FONT_AND_ILLUSTRATION_MAX) {
   failures.push(
-    `Fonts and parallax SVGs exceed ${formatKiB(FONT_AND_ILLUSTRATION_MAX)} (${formatKiB(fontAndIllustrationBytes)}).`,
+    `Fonts and illustrated SVGs exceed ${formatKiB(FONT_AND_ILLUSTRATION_MAX)} (${formatKiB(fontAndIllustrationBytes)}).`,
   );
 }
 
@@ -179,7 +201,7 @@ for (const model of models) {
 }
 console.log(`- deferred JavaScript: ${formatKiB(deferredRawBytes)} raw, ${formatKiB(deferredGzipBytes)} gzip`);
 console.log(`- lazy 3D transfer: ${formatKiB(lazyTransferBytes)}`);
-console.log(`- fonts and parallax SVGs: ${formatKiB(fontAndIllustrationBytes)}`);
+console.log(`- fonts and illustrated SVGs: ${formatKiB(fontAndIllustrationBytes)}`);
 
 if (failures.length > 0) {
   for (const failure of failures) {

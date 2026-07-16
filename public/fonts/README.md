@@ -1,6 +1,7 @@
-# Self-hosted typefaces
+# Self-hosted typeface
 
-- **Barlow Condensed 600 and 700** — distributed through `@fontsource/barlow-condensed` 5.2.7.
-- **Public Sans variable weight** — distributed through `@fontsource-variable/public-sans` 5.2.7.
+- **Montserrat variable weight** — distributed through `@fontsource-variable/montserrat` 5.2.8.
 
-The site loads only the Latin WOFF2 files in this directory and makes no remote font requests. Both families are distributed under the SIL Open Font License 1.1; the corresponding notices are included alongside the binaries.
+The site loads only the Latin WOFF2 file in this directory and makes no remote
+font requests. Montserrat is distributed under the SIL Open Font License 1.1;
+the notice is included beside the binary in `MONTSERRAT-LICENSE.txt`.

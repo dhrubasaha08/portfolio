@@ -1,56 +1,53 @@
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { PlaygroundWorld } from "./PlaygroundWorld";
+import { PlaygroundWorld, RenderDriver } from "./PlaygroundWorld";
+import { normalizeChapter } from "./chapterConfig";
 import styles from "./scene.module.css";
 
-/** @typedef {{x?: number, y?: number}} ScenePointer */
+/** @typedef {{x?: number, y?: number, impulse?: number}} ScenePointer */
 
 /**
- * Transparent, decorative WebGL layer. The original illustrated SVGs remain
- * underneath it, so delayed loading and renderer failure never leave a hole in
- * the composition.
+ * @typedef {{
+ *   activeChapter?: string,
+ *   previousChapter?: string | null,
+ *   progress?: number,
+ *   enter?: number,
+ *   exit?: number,
+ *   transitionProgress?: number,
+ *   globalProgress?: number
+ * }} ChapterMotionState
+ */
+
+/**
+ * @template T
+ * @typedef {{current: T}} MutableRef
+ */
+
+/**
+ * One transparent WebGL layer persists across the entire document. Chapter
+ * changes swap only the small procedural diorama inside this same context.
  *
  * @param {{
- *   scrollProgress?: number,
- *   pointer?: ScenePointer,
+ *   activeChapter?: string,
+ *   motionRef: MutableRef<ChapterMotionState>,
+ *   pointerRef: MutableRef<ScenePointer>,
  *   viewportTier?: 'mobile' | 'tablet' | 'desktop',
  *   visible?: boolean
  * }} props
  */
 export function SpacePlaygroundScene({
-  scrollProgress = 0,
-  pointer = { x: 0, y: 0 },
+  activeChapter = "home",
+  motionRef,
+  pointerRef,
   viewportTier = "desktop",
   visible = true,
 }) {
-  const rootRef = useRef(null);
-  const scrollProgressRef = useRef(scrollProgress);
-  const pointerRef = useRef(pointer);
+  const rootRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const animationEnabledRef = useRef(visible);
   const [ready, setReady] = useState(false);
-  const [isIntersecting, setIsIntersecting] = useState(true);
   const [isDocumentVisible, setIsDocumentVisible] = useState(
     typeof document === "undefined" || document.visibilityState !== "hidden",
   );
-
-  useEffect(() => {
-    scrollProgressRef.current = Number.isFinite(scrollProgress)
-      ? Math.max(0, Math.min(1, scrollProgress))
-      : 0;
-    pointerRef.current = pointer;
-  }, [pointer, scrollProgress]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || typeof IntersectionObserver === "undefined") return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsIntersecting(entry.isIntersecting),
-      { rootMargin: "12%", threshold: 0.01 },
-    );
-    observer.observe(root);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -61,7 +58,7 @@ export function SpacePlaygroundScene({
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  const shouldAnimate = visible && isIntersecting && isDocumentVisible;
+  const shouldAnimate = visible && isDocumentVisible;
   const maxDpr = viewportTier === "mobile" ? 1.25 : 1.5;
 
   useEffect(() => {
@@ -74,12 +71,13 @@ export function SpacePlaygroundScene({
       className={`${styles.scene} ${ready ? styles.ready : ""}`}
       aria-hidden="true"
       data-renderer="webgl"
+      data-diorama={normalizeChapter(activeChapter)}
     >
       <Canvas
         className={styles.canvas}
         aria-hidden="true"
         dpr={[1, maxDpr]}
-        frameloop={shouldAnimate ? "always" : "never"}
+        frameloop="demand"
         camera={{
           fov: viewportTier === "mobile" ? 52 : viewportTier === "tablet" ? 47 : 43,
           near: 0.1,
@@ -94,13 +92,21 @@ export function SpacePlaygroundScene({
           powerPreference: "high-performance",
           premultipliedAlpha: true,
         }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, invalidate }) => {
           gl.setClearColor("#0A0D14", 0);
           setReady(true);
+          invalidate();
         }}
       >
+        <RenderDriver
+          enabled={shouldAnimate}
+          viewportTier={viewportTier}
+          motionRef={motionRef}
+          pointerRef={pointerRef}
+        />
         <PlaygroundWorld
-          scrollProgressRef={scrollProgressRef}
+          activeChapter={activeChapter}
+          motionRef={motionRef}
           pointerRef={pointerRef}
           viewportTier={viewportTier}
           animationEnabledRef={animationEnabledRef}

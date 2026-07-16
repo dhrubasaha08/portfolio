@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import SceneBoundary from "./components/SceneBoundary";
 import SiteNav from "./components/SiteNav";
 import {
@@ -12,9 +11,7 @@ import {
   navItems,
   practiceStatements,
 } from "./data/content";
-
-/** @param {number} value @param {number} min @param {number} max */
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+import { useChapterMotion } from "./hooks/useChapterMotion";
 
 /** @param {{link: import("./data/types.js").EvidenceLink | import("./data/types.js").ContactLink}} props */
 function TextLink({ link }) {
@@ -32,20 +29,28 @@ function TextLink({ link }) {
   );
 }
 
-/** @param {{study: import("./data/types.js").CaseStudy}} props */
-function ProjectStory({ study }) {
+/**
+ * @param {{
+ *   study: import("./data/types.js").CaseStudy,
+ *   chapterRef: (node: HTMLElement | null) => void
+ * }} props
+ */
+function ProjectStory({ study, chapterRef }) {
   const isPrivate = study.visibility === "private-rnd";
   return (
     <section
       id={study.id}
-      className={`project-story project-story-${study.id}`}
+      ref={chapterRef}
+      data-chapter={study.id}
+      className={`chapter project-story project-story-${study.id}`}
       aria-labelledby={`${study.id}-heading`}
     >
       <div className="project-scenery" aria-hidden="true">
         {isPrivate ? (
           <>
             <span className="kyber-sun" />
-            <span className="kyber-horizon" />
+            <span className="kyber-horizon kyber-horizon-far" />
+            <span className="kyber-horizon kyber-horizon-near" />
             <strong>K</strong>
           </>
         ) : (
@@ -56,6 +61,7 @@ function ProjectStory({ study }) {
               <i />
             </span>
             <span className="tremor-path" />
+            <span className="tremor-marker" />
           </>
         )}
       </div>
@@ -80,80 +86,40 @@ function ProjectStory({ study }) {
 }
 
 function App() {
-  const heroRef = useRef(/** @type {HTMLElement | null} */ (null));
-  const pointerFrame = useRef(/** @type {number | null} */ (null));
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [pointer, setPointer] = useState({ x: 0, y: 0 });
-  const [viewportTier, setViewportTier] = useState(
-    /** @type {"mobile" | "tablet" | "desktop"} */ ("desktop"),
-  );
-  const [sceneVisible, setSceneVisible] = useState(true);
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      const section = heroRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const range = Math.max(1, rect.height - window.innerHeight);
-      setScrollProgress(clamp(-rect.top / range, 0, 1));
-      setSceneVisible(rect.bottom > 0 && rect.top < window.innerHeight);
-      setViewportTier(
-        window.innerWidth < 768 ? "mobile" : window.innerWidth < 1100 ? "tablet" : "desktop",
-      );
-    };
-    const schedule = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    return () => {
-      cancelAnimationFrame(frame);
-      if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, []);
-
-  /** @param {import("react").PointerEvent<HTMLElement>} event */
-  const handlePointerMove = (event) => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const next = {
-      x: clamp(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -1, 1),
-      y: clamp(-((event.clientY / Math.max(1, window.innerHeight)) * 2 - 1), -1, 1),
-    };
-    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-    pointerFrame.current = requestAnimationFrame(() => setPointer(next));
-  };
+  const {
+    activeChapter,
+    motionRef,
+    pointerRef,
+    registerChapter,
+    viewportTier,
+    visible,
+    motionRootRef,
+  } = useChapterMotion();
 
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
       <SiteNav items={navItems} />
 
-      <main id="main-content" tabIndex={-1}>
+      <div className="global-scene-layer" aria-hidden="true">
+        <SceneBoundary
+          activeChapter={activeChapter}
+          motionRef={motionRef}
+          pointerRef={pointerRef}
+          viewportTier={viewportTier}
+          visible={visible}
+        />
+      </div>
+
+      <main id="main-content" ref={motionRootRef} tabIndex={-1}>
         <section
           id="home"
-          className="hero"
-          ref={heroRef}
-          onPointerMove={handlePointerMove}
-          onPointerLeave={() => {
-            if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-            setPointer({ x: 0, y: 0 });
-          }}
+          ref={registerChapter("home")}
+          data-chapter="home"
+          className="chapter hero"
           aria-labelledby="hero-heading"
         >
           <div className="hero-sticky">
-            <SceneBoundary
-              scrollProgress={scrollProgress}
-              pointer={pointer}
-              viewportTier={viewportTier}
-              visible={sceneVisible}
-            />
             <div className="hero-copy">
               <p className="hero-eyebrow">{hero.eyebrow}</p>
               <h1 id="hero-heading">{hero.headline}</h1>
@@ -167,7 +133,18 @@ function App() {
           </div>
         </section>
 
-        <section id="work" className="impact" aria-labelledby="impact-heading">
+        <section
+          id="work"
+          ref={registerChapter("work")}
+          data-chapter="work"
+          className="chapter impact"
+          aria-labelledby="impact-heading"
+        >
+          <div className="impact-scenery" aria-hidden="true">
+            <span className="impact-sun" />
+            <span className="impact-orbit" />
+            <span className="impact-review-seal">review</span>
+          </div>
           <div className="impact-heading">
             <p className="plain-label">Current work</p>
             <h2 id="impact-heading">{impactCaseStudy.title}</h2>
@@ -177,9 +154,9 @@ function App() {
             <p>{impactCaseStudy.approach}</p>
           </div>
           <div className="impact-result" aria-label={impactCaseStudy.metric.label}>
-            <span>{impactCaseStudy.metric.before}</span>
+            <span className="impact-before">{impactCaseStudy.metric.before}</span>
             <i aria-hidden="true">→</i>
-            <span>{impactCaseStudy.metric.after}</span>
+            <span className="impact-after">{impactCaseStudy.metric.after}</span>
           </div>
           <div className="impact-footnotes">
             <p>{impactCaseStudy.outcome}</p>
@@ -187,14 +164,28 @@ function App() {
           </div>
         </section>
 
-        <section id="practice" className="practice" aria-labelledby="practice-heading">
+        <section
+          id="practice"
+          ref={registerChapter("practice")}
+          data-chapter="practice"
+          className="chapter practice"
+          aria-labelledby="practice-heading"
+        >
+          <div className="practice-landscape" aria-hidden="true">
+            <span className="practice-band practice-band-sky" />
+            <span className="practice-band practice-band-far" />
+            <span className="practice-band practice-band-near" />
+          </div>
           <div className="practice-heading">
             <p className="plain-label">What I build now</p>
             <h2 id="practice-heading">Software for work that needs to hold together.</h2>
           </div>
           <div className="practice-statements">
-            {practiceStatements.map((statement) => (
-              <article key={statement.id}>
+            {practiceStatements.map((statement, index) => (
+              <article
+                key={statement.id}
+                style={/** @type {import("react").CSSProperties} */ ({ "--statement-index": index })}
+              >
                 <h3>{statement.title}</h3>
                 <p>{statement.body}</p>
               </article>
@@ -202,16 +193,36 @@ function App() {
           </div>
         </section>
 
-        {caseStudies.map((study) => <ProjectStory key={study.id} study={study} />)}
+        {caseStudies.map((study) => (
+          <ProjectStory
+            key={study.id}
+            study={study}
+            chapterRef={registerChapter(/** @type {import("./data/types.js").ChapterId} */ (study.id))}
+          />
+        ))}
 
-        <section id="experience" className="experience" aria-labelledby="experience-heading">
+        <section
+          id="experience"
+          ref={registerChapter("experience")}
+          data-chapter="experience"
+          className="chapter experience"
+          aria-labelledby="experience-heading"
+        >
+          <div className="experience-route" aria-hidden="true">
+            <span className="experience-route-line" />
+            <span className="experience-route-stop experience-route-stop-first" />
+            <span className="experience-route-stop experience-route-stop-last" />
+          </div>
           <div className="experience-heading">
             <p className="plain-label">Experience</p>
             <h2 id="experience-heading">Learning the system, then making it better.</h2>
           </div>
           <div className="experience-list">
-            {experienceEntries.map((entry) => (
-              <article key={entry.id}>
+            {experienceEntries.map((entry, index) => (
+              <article
+                key={entry.id}
+                style={/** @type {import("react").CSSProperties} */ ({ "--experience-index": index })}
+              >
                 <div className="experience-title">
                   <p>{entry.current ? "Current" : entry.period}</p>
                   <h3>{entry.role}</h3>
@@ -229,7 +240,17 @@ function App() {
           </div>
         </section>
 
-        <section id="about" className="about" aria-labelledby="about-heading">
+        <section
+          id="about"
+          ref={registerChapter("about")}
+          data-chapter="about"
+          className="chapter about"
+          aria-labelledby="about-heading"
+        >
+          <div className="about-horizon" aria-hidden="true">
+            <span />
+            <span />
+          </div>
           <div className="about-copy">
             <p className="plain-label">About</p>
             <h2 id="about-heading">{about.title}</h2>
@@ -243,12 +264,29 @@ function App() {
           </aside>
         </section>
 
-        <section id="contact" className="contact" aria-labelledby="contact-heading">
-          <p className="plain-label">Contact</p>
-          <h2 id="contact-heading">Have a difficult workflow worth untangling?</h2>
-          <p>Tell me what is slow, fragile, or still being held together by hand.</p>
-          <div className="contact-links">
-            {contactLinks.map((link) => <TextLink key={link.href} link={link} />)}
+        <section
+          id="contact"
+          ref={registerChapter("contact")}
+          data-chapter="contact"
+          className="chapter contact"
+          aria-labelledby="contact-heading"
+        >
+          <div className="contact-scenery" aria-hidden="true">
+            <span className="contact-horizon" />
+            {Array.from({ length: 8 }, (_, index) => (
+              <i
+                key={index}
+                style={/** @type {import("react").CSSProperties} */ ({ "--star-index": index })}
+              />
+            ))}
+          </div>
+          <div className="contact-copy">
+            <p className="plain-label">Contact</p>
+            <h2 id="contact-heading">Have a difficult workflow worth untangling?</h2>
+            <p>Tell me what is slow, fragile, or still being held together by hand.</p>
+            <div className="contact-links">
+              {contactLinks.map((link) => <TextLink key={link.href} link={link} />)}
+            </div>
           </div>
         </section>
       </main>

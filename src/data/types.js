@@ -53,4 +53,39 @@
  * @property {boolean} external
  */
 
+/**
+ * The ordered document chapters that participate in the shared 2D and 3D
+ * motion system.
+ *
+ * @typedef {"home" | "work" | "practice" | "project-kyber" | "tremor-track" | "experience" | "about" | "contact"} ChapterId
+ */
+
+/**
+ * @typedef {"interactive" | "reduced" | "save-data" | "unsupported" | "failed" | "static"} MotionMode
+ */
+
+/**
+ * Mutable pointer input shared with the decorative scene without triggering
+ * React renders on every pointer event.
+ *
+ * @typedef {Object} ScenePointer
+ * @property {number} x Normalized viewport x position from -1 to 1.
+ * @property {number} y Normalized viewport y position from -1 to 1.
+ * @property {number} impulse Decaying tap/pointer impulse from 0 to 1.
+ */
+
+/**
+ * Mutable chapter state shared with the decorative scene. All progress values
+ * are normalized from 0 to 1.
+ *
+ * @typedef {Object} ChapterMotionState
+ * @property {ChapterId} activeChapter
+ * @property {ChapterId} previousChapter
+ * @property {number} progress
+ * @property {number} enter
+ * @property {number} exit
+ * @property {number} transitionProgress
+ * @property {number} globalProgress
+ */
+
 export {};

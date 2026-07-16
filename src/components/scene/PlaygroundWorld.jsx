@@ -1,23 +1,33 @@
-import {
-  AnimationMixer,
-  Box3,
-  MathUtils,
-  Object3D,
-  Vector3,
-} from "three";
+import { AnimationMixer, Box3, MathUtils, Object3D, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import astronautUrl from "../../assets/3d/spaceman.glb?url";
+import { ChapterDioramas } from "./ChapterDioramas";
+import { normalizeChapter } from "./chapterConfig";
 import { createCelestialDust, createPebbleTransforms } from "./geometry";
 
-/** @typedef {{x?: number, y?: number}} ScenePointer */
+/** @typedef {{x?: number, y?: number, impulse?: number}} ScenePointer */
+
+/**
+ * @typedef {{
+ *   activeChapter?: string,
+ *   previousChapter?: string | null,
+ *   progress?: number,
+ *   enter?: number,
+ *   exit?: number,
+ *   transitionProgress?: number,
+ *   globalProgress?: number
+ * }} ChapterMotionState
+ */
 
 /**
  * @template T
  * @typedef {{current: T}} MutableRef
  */
+
+const clamp01 = (value) => MathUtils.clamp(Number(value) || 0, 0, 1);
 
 function useAstronautAsset() {
   const [asset, setAsset] = useState(
@@ -53,13 +63,14 @@ function useAstronautAsset() {
 
 /**
  * @param {{
+ *   activeChapter: string,
  *   pointerRef: MutableRef<ScenePointer>,
- *   scrollProgressRef: MutableRef<number>,
+ *   motionRef: MutableRef<ChapterMotionState>,
  *   viewportTier: string,
  *   animationEnabledRef: MutableRef<boolean>
  * }} props
  */
-function Astronaut({ pointerRef, scrollProgressRef, viewportTier, animationEnabledRef }) {
+function Astronaut({ activeChapter, pointerRef, motionRef, viewportTier, animationEnabledRef }) {
   const groupRef = useRef(/** @type {import("three").Group | null} */ (null));
   const gltf = useAstronautAsset();
   const model = useMemo(() => (gltf ? cloneSkeleton(gltf.scene) : null), [gltf]);
@@ -98,42 +109,65 @@ function Astronaut({ pointerRef, scrollProgressRef, viewportTier, animationEnabl
     if (!group || !mixer) return;
 
     const safeDelta = Math.min(delta, 0.05);
-    const progress = MathUtils.clamp(scrollProgressRef.current, 0, 1);
+    const motion = motionRef.current;
+    const chapter = normalizeChapter(motion.activeChapter ?? activeChapter);
+    const progress = clamp01(motion.progress);
     const pointer = pointerRef.current;
     const pointerX = MathUtils.clamp(Number(pointer?.x) || 0, -1, 1);
     const pointerY = MathUtils.clamp(Number(pointer?.y) || 0, -1, 1);
+    const impulse = MathUtils.clamp(Number(pointer?.impulse) || 0, 0, 1);
     const mobile = viewportTier === "mobile";
     const tablet = viewportTier === "tablet";
+    const hero = chapter === "hero";
+    const cameo = !hero && (progress < 0.28 || progress > 0.72);
     const eased = progress * progress * (3 - 2 * progress);
+    const cameoEdge = progress < 0.28 ? 1 - progress / 0.28 : (progress - 0.72) / 0.28;
     const float = animationEnabledRef.current
       ? Math.sin(state.clock.elapsedTime * 0.66) * (mobile ? 0.08 : 0.12)
       : 0;
-    const targetX = mobile
-      ? MathUtils.lerp(1.25, -0.72, eased)
-      : MathUtils.lerp(tablet ? 2.0 : 2.55, -1.35, eased) + Math.sin(progress * Math.PI * 2) * 0.2;
-    const targetY = mobile
-      ? MathUtils.lerp(-1.05, 0.32, eased) + Math.sin(progress * Math.PI * 2) * 0.22
-      : MathUtils.lerp(-0.35, 0.58, eased) + Math.sin(progress * Math.PI * 2.4) * 0.34;
 
+    group.visible = hero || cameo;
+    if (!group.visible) return;
     if (animationEnabledRef.current) mixer.update(safeDelta);
 
-    group.position.x = MathUtils.damp(group.position.x, targetX, 4.2, safeDelta);
-    group.position.y = MathUtils.damp(group.position.y, targetY + float, 4.2, safeDelta);
+    const heroX = mobile
+      ? MathUtils.lerp(1.25, -0.72, eased)
+      : MathUtils.lerp(tablet ? 2.0 : 2.55, -1.35, eased) + Math.sin(progress * Math.PI * 2) * 0.2;
+    const heroY = mobile
+      ? MathUtils.lerp(-1.05, 0.32, eased) + Math.sin(progress * Math.PI * 2) * 0.22
+      : MathUtils.lerp(-0.35, 0.58, eased) + Math.sin(progress * Math.PI * 2.4) * 0.34;
+    const direction = progress < 0.28 ? 1 : -1;
+    const cameoX = (mobile ? 2.2 : 4.2) * direction + (1 - cameoEdge) * direction * 0.8;
+    const cameoY = mobile ? 2.25 : 2.5;
+    const targetScale = normalizedScale * (hero ? 1 : 0.36 * Math.max(0.3, cameoEdge));
+
+    group.position.x = MathUtils.damp(
+      group.position.x,
+      (hero ? heroX : cameoX) + pointerX * (hero ? 0.08 : 0.04),
+      4.2,
+      safeDelta,
+    );
+    group.position.y = MathUtils.damp(
+      group.position.y,
+      (hero ? heroY : cameoY) + float,
+      4.2,
+      safeDelta,
+    );
     group.position.z = MathUtils.damp(
       group.position.z,
-      0.35 + Math.sin(progress * Math.PI) * 0.46,
+      hero ? 0.35 + Math.sin(progress * Math.PI) * 0.46 : -1.25,
       4,
       safeDelta,
     );
     group.rotation.y = MathUtils.damp(
       group.rotation.y,
-      2.18 + pointerX * 0.14 + progress * 0.16,
+      2.18 + pointerX * 0.14 + (hero ? progress * 0.16 : direction * 0.3) + impulse * 0.08,
       3.7,
       safeDelta,
     );
     group.rotation.x = MathUtils.damp(
       group.rotation.x,
-      pointerY * 0.07 - progress * 0.05,
+      pointerY * 0.07 - (hero ? progress * 0.05 : 0.08),
       3.7,
       safeDelta,
     );
@@ -143,6 +177,7 @@ function Astronaut({ pointerRef, scrollProgressRef, viewportTier, animationEnabl
       3.4,
       safeDelta,
     );
+    group.scale.setScalar(MathUtils.damp(group.scale.x, targetScale, 5, safeDelta));
   });
 
   if (!model) return null;
@@ -161,7 +196,6 @@ function Astronaut({ pointerRef, scrollProgressRef, viewportTier, animationEnabl
     </group>
   );
 }
-
 /** @param {{viewportTier: string, animationEnabledRef: MutableRef<boolean>}} props */
 function CelestialDust({ viewportTier, animationEnabledRef }) {
   const pointsRef = useRef(/** @type {import("three").Points | null} */ (null));
@@ -186,7 +220,7 @@ function CelestialDust({ viewportTier, animationEnabledRef }) {
         size={viewportTier === "mobile" ? 0.047 : 0.038}
         sizeAttenuation
         transparent
-        opacity={0.52}
+        opacity={0.4}
         depthWrite={false}
         toneMapped={false}
       />
@@ -194,8 +228,14 @@ function CelestialDust({ viewportTier, animationEnabledRef }) {
   );
 }
 
-/** @param {{animationEnabledRef: MutableRef<boolean>}} props */
-function FloatingPebbles({ animationEnabledRef }) {
+/**
+ * @param {{
+ *   activeChapter: string,
+ *   motionRef: MutableRef<ChapterMotionState>,
+ *   animationEnabledRef: MutableRef<boolean>
+ * }} props
+ */
+function FloatingPebbles({ activeChapter, motionRef, animationEnabledRef }) {
   const meshRef = useRef(/** @type {import("three").InstancedMesh | null} */ (null));
   const transforms = useMemo(() => createPebbleTransforms(), []);
   const helper = useMemo(() => new Object3D(), []);
@@ -215,7 +255,9 @@ function FloatingPebbles({ animationEnabledRef }) {
 
   useFrame((state) => {
     const mesh = meshRef.current;
-    if (!mesh || !animationEnabledRef.current) return;
+    if (!mesh) return;
+    mesh.visible = normalizeChapter(motionRef.current.activeChapter ?? activeChapter) === "hero";
+    if (!mesh.visible || !animationEnabledRef.current) return;
     mesh.rotation.y = Math.sin(state.clock.elapsedTime * 0.09) * 0.04;
     mesh.rotation.z = Math.sin(state.clock.elapsedTime * 0.13) * 0.025;
   });
@@ -246,31 +288,99 @@ function ContextLossListener() {
 }
 
 /**
+ * A demand-loop driver keeps one canvas alive across the document while
+ * allowing hidden tabs to consume no animation frames. Scroll and pointer
+ * changes temporarily raise the cadence; an untouched scene settles into a
+ * restrained idle rhythm instead of continuously occupying the main thread.
+ *
  * @param {{
- *   scrollProgressRef: MutableRef<number>,
+ *   enabled: boolean,
+ *   viewportTier: string,
+ *   motionRef: MutableRef<ChapterMotionState>,
+ *   pointerRef: MutableRef<ScenePointer>
+ * }} props
+ */
+export function RenderDriver({ enabled, viewportTier, motionRef, pointerRef }) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    if (!enabled) {
+      invalidate();
+      return undefined;
+    }
+
+    let frame = 0;
+    let previous = 0;
+    let lastActivity = performance.now();
+    let previousMotion = "";
+    let previousPointer = "";
+    const render = (time) => {
+      const motion = motionRef.current;
+      const pointer = pointerRef.current;
+      const motionKey = `${motion.activeChapter ?? ""}:${Number(motion.progress ?? 0).toFixed(4)}:${Number(motion.transitionProgress ?? 0).toFixed(4)}`;
+      const pointerKey = `${Number(pointer.x ?? 0).toFixed(3)}:${Number(pointer.y ?? 0).toFixed(3)}:${Number(pointer.impulse ?? 0).toFixed(3)}`;
+      if (motionKey !== previousMotion || pointerKey !== previousPointer) {
+        previousMotion = motionKey;
+        previousPointer = pointerKey;
+        lastActivity = time;
+      }
+
+      const engaged = time - lastActivity < 720;
+      const activeRate = viewportTier === "mobile" ? 30 : 45;
+      const idleRate = viewportTier === "mobile" ? 6 : 10;
+      const minimumFrameTime = 1000 / (engaged ? activeRate : idleRate);
+      if (time - previous >= minimumFrameTime) {
+        previous = time;
+        invalidate();
+      }
+      frame = requestAnimationFrame(render);
+    };
+    frame = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(frame);
+  }, [enabled, invalidate, motionRef, pointerRef, viewportTier]);
+
+  return null;
+}
+
+/**
+ * @param {{
+ *   activeChapter: string,
+ *   motionRef: MutableRef<ChapterMotionState>,
  *   pointerRef: MutableRef<ScenePointer>,
  *   viewportTier: string,
  *   animationEnabledRef: MutableRef<boolean>
  * }} props
  */
 export function PlaygroundWorld({
-  scrollProgressRef,
+  activeChapter,
+  motionRef,
   pointerRef,
   viewportTier,
   animationEnabledRef,
 }) {
   return (
     <>
-      <ambientLight intensity={0.7} color="#F2E8D5" />
-      <directionalLight position={[-4, 6, 8]} intensity={2.1} color="#F2E8D5" />
-      <pointLight position={[4, 1, 5]} intensity={2.4} color="#D6683C" />
-      <pointLight position={[-4, -2, 3]} intensity={1.2} color="#6FA8C8" />
+      <ambientLight intensity={0.78} color="#F2E8D5" />
+      <directionalLight position={[-4, 6, 8]} intensity={2.15} color="#F2E8D5" />
+      <pointLight position={[4, 1, 5]} intensity={2.25} color="#D6683C" />
+      <pointLight position={[-4, -2, 3]} intensity={1.25} color="#6FA8C8" />
 
       <CelestialDust viewportTier={viewportTier} animationEnabledRef={animationEnabledRef} />
-      <FloatingPebbles animationEnabledRef={animationEnabledRef} />
-      <Astronaut
+      <FloatingPebbles
+        activeChapter={activeChapter}
+        motionRef={motionRef}
+        animationEnabledRef={animationEnabledRef}
+      />
+      <ChapterDioramas
+        activeChapter={activeChapter}
+        motionRef={motionRef}
         pointerRef={pointerRef}
-        scrollProgressRef={scrollProgressRef}
+        viewportTier={viewportTier}
+      />
+      <Astronaut
+        activeChapter={activeChapter}
+        pointerRef={pointerRef}
+        motionRef={motionRef}
         viewportTier={viewportTier}
         animationEnabledRef={animationEnabledRef}
       />

@@ -27,15 +27,17 @@ Repository and live-project evidence take precedence over summaries. If evidence
 
 ## Design and engineering rules
 
-- Follow the **Personal Space Playground** direction: a dusty illustrated universe, playful layered depth, and an astronaut-led scroll journey that feels deliberately authored.
+- Follow the **Animated Chapter Space Playground** direction: a dusty illustrated universe, playful layered depth, and a native-scroll journey in which every content section becomes a distinct animated chapter.
 - Lead with dependable software, backend systems, workflow automation, and internal tools. Applied AI is one tool in the practice, not the site's visual identity.
 - Do not add cards, pills, glass panels, numbered controls, monospace telemetry labels, gradient text, neural diagrams, dashboard grids, prominent rectangular CTA buttons, or generic AI-product styling.
-- Use self-hosted Barlow Condensed only for limited display text and Public Sans for body/navigation copy. Keep license notices with the font assets and make no remote font requests.
+- Use the self-hosted Montserrat variable family for display, body, and navigation copy. Keep its OFL notice with the font assets and make no remote font requests.
 - Keep all information and navigation in semantic DOM. WebGL and 2.5D artwork are decorative progressive enhancement and never required to navigate or understand the page.
-- Drive scene motion from native document scroll and gentle pointer movement. Never capture touch scrolling or create nested page scroll containers.
+- Drive chapter motion from native document scroll, gentle desktop pointer movement, and non-blocking mobile tap impulses. Never capture touch scrolling or create nested page scroll containers.
+- Keep a single transparent WebGL canvas across the page. Render only the active chapter and its transitioning neighbour; build new dioramas procedurally rather than adding models, textures, video, or animation libraries.
+- Publish each section's normalized motion through stable `data-chapter` attributes and CSS custom properties. Keep the scene's active `data-scene-chapter`, `data-diorama`, and `data-astronaut-cameo` state externally observable for regression testing.
 - Respect reduced motion, save-data, unsupported WebGL, context loss, hidden tabs, and offscreen rendering. Fallback content must remain complete.
 - Maintain keyboard navigation, accessible names, visible focus, WCAG AA contrast, and one logical heading hierarchy.
-- Keep the astronaut attribution visible and accurate. Do not add a second model, video, remote avatar, remote font, or stock-art dependency.
+- Keep the astronaut attribution visible and accurate. Use it for the hero and brief chapter transitions, but let the procedural chapter dioramas remain the focal point. Do not add a second model, texture, video, remote avatar, remote font, or stock-art dependency.
 
 ## Validation and deployment
 
