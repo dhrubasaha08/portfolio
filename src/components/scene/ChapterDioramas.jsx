@@ -2,6 +2,7 @@ import { MathUtils, Shape, Vector3, CatmullRomCurve3 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapterPalette, normalizeChapter } from "./chapterConfig";
+import { RoundedGeometry, StudioSurface } from "./ScenePrimitives";
 
 /**
  * @template T
@@ -32,7 +33,7 @@ const desktopLayouts = Object.freeze({
   kyber: { x: -3.2, y: -0.25, scale: 0.82 },
   tremor: { x: -3.25, y: -0.2, scale: 0.82 },
   experience: { x: 3.5, y: -2.6, scale: 0.55 },
-  about: { x: 3.25, y: -2.15, scale: 0.72 },
+  about: { x: 3.5, y: -2.7, scale: 0.58 },
   contact: { x: 3.25, y: -0.62, scale: 0.82 },
 });
 
@@ -60,18 +61,6 @@ function getDioramaLayout(chapter, mobile) {
   return layouts[chapter] ?? { x: mobile ? 1.1 : 3.2, y: mobile ? -2.3 : -1.7, scale: mobile ? 0.44 : 0.72 };
 }
 
-function Matte({ color, emissive = "#000000", emissiveIntensity = 0 }) {
-  return (
-    <meshStandardMaterial
-      color={color}
-      emissive={emissive}
-      emissiveIntensity={emissiveIntensity}
-      roughness={0.86}
-      metalness={0.03}
-    />
-  );
-}
-
 /** @param {{motionRef: MutableRef<ChapterMotionState>}} props */
 function WorkDiorama({ motionRef }) {
   const feedRef = useRef(/** @type {import('three').Group | null} */ (null));
@@ -95,35 +84,43 @@ function WorkDiorama({ motionRef }) {
       <group ref={feedRef} position={[-0.8, 0, 0]}>
         {[-0.62, 0, 0.62].map((offset, index) => (
           <mesh key={offset} position={[offset, (index - 1) * 0.08, index * -0.08]} rotation={[0.04, 0, -0.04]}>
-            <boxGeometry args={[0.78, 0.06, 1.02]} />
-            <Matte color={index === 1 ? chapterPalette.cream : "#D9CEBB"} />
+            <RoundedGeometry size={[0.78, 0.055, 1.02]} radius={0.025} segments={5} />
+            <StudioSurface
+              color={index === 1 ? chapterPalette.cream : "#D9CEBB"}
+              roughness={0.76}
+              clearcoat={0.04}
+            />
           </mesh>
         ))}
       </group>
       <mesh ref={clockRef} position={[0.18, 0.35, 0.36]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.62, 0.62, 0.14, 16]} />
-        <Matte color={chapterPalette.sky} />
+        <cylinderGeometry args={[0.62, 0.62, 0.14, 64]} />
+        <StudioSurface color={chapterPalette.sky} roughness={0.42} clearcoat={0.3} />
       </mesh>
       <mesh position={[0.18, 0.35, 0.47]}>
-        <boxGeometry args={[0.05, 0.42, 0.05]} />
-        <Matte color={chapterPalette.ink} />
+        <RoundedGeometry size={[0.055, 0.42, 0.055]} radius={0.026} segments={4} />
+        <StudioSurface color={chapterPalette.ink} roughness={0.34} />
       </mesh>
       <mesh position={[0.32, 0.49, 0.48]} rotation={[0, 0, -0.72]}>
-        <boxGeometry args={[0.04, 0.28, 0.04]} />
-        <Matte color={chapterPalette.ink} />
+        <RoundedGeometry size={[0.045, 0.28, 0.045]} radius={0.021} segments={4} />
+        <StudioSurface color={chapterPalette.ink} roughness={0.34} />
       </mesh>
       <group ref={sealRef} position={[1.42, -0.15, 0.24]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.46, 0.12, 7, 18]} />
-          <Matte color={chapterPalette.orange} />
+        <mesh>
+          <torusGeometry args={[0.46, 0.12, 16, 64]} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
         </mesh>
         <mesh position={[0, 0, -0.02]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.31, 0.31, 0.08, 16]} />
-          <Matte color={chapterPalette.cream} />
+          <cylinderGeometry args={[0.31, 0.31, 0.08, 64]} />
+          <StudioSurface color={chapterPalette.cream} roughness={0.68} clearcoat={0.08} />
         </mesh>
-        <mesh position={[0.02, -0.01, 0.09]} rotation={[0, 0, -0.65]}>
-          <boxGeometry args={[0.11, 0.5, 0.08]} />
-          <Matte color={chapterPalette.moss} />
+        <mesh position={[-0.1, -0.04, 0.09]} rotation={[0, 0, -0.72]}>
+          <RoundedGeometry size={[0.09, 0.28, 0.075]} radius={0.035} segments={4} />
+          <StudioSurface color={chapterPalette.moss} roughness={0.42} />
+        </mesh>
+        <mesh position={[0.11, -0.01, 0.09]} rotation={[0, 0, 0.78]}>
+          <RoundedGeometry size={[0.09, 0.44, 0.075]} radius={0.035} segments={4} />
+          <StudioSurface color={chapterPalette.moss} roughness={0.42} />
         </mesh>
       </group>
     </group>
@@ -154,51 +151,66 @@ function PracticeDiorama({ motionRef, viewportTier }) {
     <group ref={groupRef} position={[0, 0.05, 0]} scale={compact ? 0.88 : 1}>
       <group position={[-spacing * 1.5, 0.1, 0]} rotation={[0.1, 0.15, 0]}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.17, 0.17, 1.15, 10]} />
-          <Matte color={chapterPalette.sky} />
+          <cylinderGeometry args={[0.17, 0.17, 1.15, 32]} />
+          <StudioSurface color={chapterPalette.sky} roughness={0.42} clearcoat={0.26} />
         </mesh>
         <mesh position={[0, 0.36, 0]}>
-          <cylinderGeometry args={[0.17, 0.17, 0.76, 10]} />
-          <Matte color={chapterPalette.sky} />
+          <cylinderGeometry args={[0.17, 0.17, 0.76, 32]} />
+          <StudioSurface color={chapterPalette.sky} roughness={0.42} clearcoat={0.26} />
         </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <sphereGeometry args={[0.27, 10, 7]} />
-          <Matte color={chapterPalette.orange} />
+        <mesh>
+          <sphereGeometry args={[0.27, 32, 20]} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.36} clearcoat={0.32} />
         </mesh>
       </group>
 
       <group ref={wheelRef} position={[-spacing * 0.5, 0.08, 0.05]}>
         <mesh>
-          <torusGeometry args={[0.45, 0.13, 7, 16]} />
-          <Matte color={chapterPalette.orange} />
+          <torusGeometry args={[0.45, 0.13, 16, 64]} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.38} clearcoat={0.3} />
         </mesh>
         {[0, Math.PI / 2].map((rotation) => (
           <mesh key={rotation} rotation={[0, 0, rotation]}>
-            <boxGeometry args={[0.12, 0.84, 0.12]} />
-            <Matte color={chapterPalette.cream} />
+            <RoundedGeometry size={[0.12, 0.84, 0.12]} radius={0.055} segments={4} />
+            <StudioSurface color={chapterPalette.cream} roughness={0.62} clearcoat={0.1} />
           </mesh>
         ))}
+        <mesh position={[0, 0, 0.08]}>
+          <sphereGeometry args={[0.18, 28, 18]} />
+          <StudioSurface color={chapterPalette.ink} roughness={0.32} clearcoat={0.24} />
+        </mesh>
       </group>
 
       <group position={[spacing * 0.52, 0.02, 0]} rotation={[0.03, -0.08, -0.02]}>
         <mesh>
-          <boxGeometry args={[0.88, 0.62, 0.58]} />
-          <Matte color={chapterPalette.moss} />
+          <RoundedGeometry size={[0.88, 0.62, 0.58]} radius={0.12} segments={5} />
+          <StudioSurface color={chapterPalette.moss} roughness={0.5} clearcoat={0.18} />
         </mesh>
         <mesh position={[0, 0.45, 0]}>
-          <torusGeometry args={[0.25, 0.07, 6, 12, Math.PI]} />
-          <Matte color={chapterPalette.cream} />
+          <torusGeometry args={[0.25, 0.07, 12, 48, Math.PI]} />
+          <StudioSurface color={chapterPalette.cream} roughness={0.56} />
+        </mesh>
+        <mesh position={[0, 0.02, 0.32]}>
+          <RoundedGeometry size={[0.28, 0.12, 0.06]} radius={0.045} segments={4} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.22} />
         </mesh>
       </group>
 
       <group position={[spacing * 1.5, 0.08, 0]}>
-        <mesh ref={prismRef}>
-          <octahedronGeometry args={[0.52, 0]} />
-          <Matte color={chapterPalette.sky} emissive={chapterPalette.sky} emissiveIntensity={0.08} />
+        <mesh ref={prismRef} scale={[0.78, 1, 0.78]}>
+          <sphereGeometry args={[0.52, 36, 24]} />
+          <StudioSurface
+            color={chapterPalette.sky}
+            emissive={chapterPalette.sky}
+            emissiveIntensity={0.08}
+            roughness={0.28}
+            metalness={0.08}
+            clearcoat={0.46}
+          />
         </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.65, 0.045, 6, 18]} />
-          <Matte color={chapterPalette.cream} />
+        <mesh>
+          <torusGeometry args={[0.65, 0.045, 12, 64]} />
+          <StudioSurface color={chapterPalette.cream} roughness={0.52} clearcoat={0.14} />
         </mesh>
       </group>
     </group>
@@ -225,36 +237,42 @@ function KyberDiorama({ motionRef }) {
         {[-0.86, 0.86].map((x, index) => (
           <group key={x} position={[x, 0, -0.12 - index * 0.16]} rotation={[0, index ? -0.1 : 0.1, 0]}>
             <mesh position={[0, 0.94, 0]}>
-              <boxGeometry args={[0.12, 0.12, 0.38]} />
-              <Matte color={chapterPalette.orange} />
+              <RoundedGeometry size={[0.12, 0.12, 0.38]} radius={0.05} segments={4} />
+              <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
             </mesh>
             <mesh position={[0, -0.94, 0]}>
-              <boxGeometry args={[0.12, 0.12, 0.38]} />
-              <Matte color={chapterPalette.orange} />
+              <RoundedGeometry size={[0.12, 0.12, 0.38]} radius={0.05} segments={4} />
+              <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
             </mesh>
             <mesh position={[0, 0, 0]}>
-              <boxGeometry args={[0.12, 2, 0.38]} />
-              <Matte color={chapterPalette.orange} />
+              <RoundedGeometry size={[0.12, 2, 0.38]} radius={0.055} segments={4} />
+              <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
             </mesh>
           </group>
         ))}
         <mesh position={[0, 1.02, -0.18]}>
-          <boxGeometry args={[1.84, 0.12, 0.38]} />
-          <Matte color={chapterPalette.orange} />
+          <RoundedGeometry size={[1.84, 0.12, 0.38]} radius={0.055} segments={4} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
         </mesh>
         <mesh position={[0, -1.02, -0.18]}>
-          <boxGeometry args={[1.84, 0.12, 0.38]} />
-          <Matte color={chapterPalette.orange} />
+          <RoundedGeometry size={[1.84, 0.12, 0.38]} radius={0.055} segments={4} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.4} clearcoat={0.28} />
         </mesh>
       </group>
       <group ref={monolithRef} rotation={[0.04, -0.18, -0.03]}>
         <mesh>
-          <boxGeometry args={[0.86, 1.78, 0.56]} />
-          <Matte color="#202739" />
+          <RoundedGeometry size={[0.86, 1.78, 0.56]} radius={0.12} segments={6} />
+          <StudioSurface color="#202739" roughness={0.32} metalness={0.08} clearcoat={0.34} />
         </mesh>
         <mesh position={[0, 0.18, 0.3]}>
-          <boxGeometry args={[0.16, 0.78, 0.035]} />
-          <Matte color={chapterPalette.sky} emissive={chapterPalette.sky} emissiveIntensity={0.18} />
+          <RoundedGeometry size={[0.16, 0.78, 0.035]} radius={0.016} segments={4} />
+          <StudioSurface
+            color={chapterPalette.sky}
+            emissive={chapterPalette.sky}
+            emissiveIntensity={0.18}
+            roughness={0.3}
+            clearcoat={0.38}
+          />
         </mesh>
       </group>
     </group>
@@ -276,29 +294,52 @@ function TremorDiorama({ motionRef }) {
     <group position={[0, 0.02, 0]}>
       <group ref={moonRef}>
         <mesh>
-          <icosahedronGeometry args={[1.22, 2]} />
-          <Matte color="#B7AD9B" />
+          <sphereGeometry args={[1.22, 48, 32]} />
+          <StudioSurface color="#B7AD9B" roughness={0.8} clearcoat={0.03} />
         </mesh>
         {[
-          [0.52, 0.54, 1.02, 0.2],
-          [-0.58, 0.28, 1.04, 0.25],
-          [0.08, -0.62, 1.1, 0.18],
-          [0.78, -0.28, 0.84, 0.13],
-        ].map(([x, y, z, scale]) => (
-          <mesh key={`${x}-${y}`} position={[x, y, z]} scale={scale}>
-            <sphereGeometry args={[1, 8, 5]} />
-            <Matte color="#716B61" />
-          </mesh>
+          [0.52, 0.54, 1.02, 0.2, -0.44, 0.42],
+          [-0.58, 0.28, 1.04, 0.25, -0.24, -0.48],
+          [0.08, -0.62, 1.1, 0.18, 0.52, 0.07],
+          [0.78, -0.28, 0.84, 0.13, 0.23, 0.7],
+        ].map(([x, y, z, scale, rotationX, rotationY]) => (
+          <group
+            key={`${x}-${y}`}
+            position={[x, y, z]}
+            rotation={[rotationX, rotationY, 0]}
+            scale={scale}
+          >
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.66, 0.7, 0.05, 32]} />
+              <StudioSurface color="#777064" roughness={0.9} clearcoat={0} />
+            </mesh>
+            <mesh position={[0, 0, 0.045]}>
+              <torusGeometry args={[0.72, 0.13, 12, 48]} />
+              <StudioSurface color="#A69C89" roughness={0.82} clearcoat={0.02} />
+            </mesh>
+          </group>
         ))}
       </group>
       <group ref={orbitRef} rotation={[0.48, 0.12, 0]}>
         <mesh>
-          <torusGeometry args={[1.72, 0.025, 5, 32]} />
-          <Matte color={chapterPalette.sky} emissive={chapterPalette.sky} emissiveIntensity={0.2} />
+          <torusGeometry args={[1.72, 0.025, 12, 72]} />
+          <StudioSurface
+            color={chapterPalette.sky}
+            emissive={chapterPalette.sky}
+            emissiveIntensity={0.2}
+            roughness={0.34}
+            clearcoat={0.28}
+          />
         </mesh>
         <mesh position={[1.72, 0, 0]}>
-          <sphereGeometry args={[0.15, 9, 6]} />
-          <Matte color={chapterPalette.orange} emissive={chapterPalette.orange} emissiveIntensity={0.3} />
+          <sphereGeometry args={[0.15, 28, 18]} />
+          <StudioSurface
+            color={chapterPalette.orange}
+            emissive={chapterPalette.orange}
+            emissiveIntensity={0.3}
+            roughness={0.3}
+            clearcoat={0.34}
+          />
         </mesh>
       </group>
     </group>
@@ -333,22 +374,36 @@ function ExperienceDiorama({ motionRef }) {
       ].map(([x, y, color], index) => (
         <group key={String(x)} position={[Number(x), Number(y), 0]}>
           <mesh position={[0, 0.25, 0]}>
-            <boxGeometry args={[0.42, 1.48, 0.4]} />
-            <Matte color={String(color)} />
+            <RoundedGeometry size={[0.42, 1.48, 0.4]} radius={0.17} segments={6} />
+            <StudioSurface color={String(color)} roughness={0.46} clearcoat={0.24} />
           </mesh>
-          <mesh position={[0, 1.08, 0]} rotation={[0, 0, index ? -0.22 : 0.22]}>
-            <coneGeometry args={[0.38, 0.56, 4]} />
-            <Matte color={chapterPalette.cream} />
+          <mesh
+            position={[0, 1.04, 0]}
+            rotation={[0, 0, index ? -0.12 : 0.12]}
+            scale={[1, 1.22, 1]}
+          >
+            <sphereGeometry args={[0.33, 32, 20]} />
+            <StudioSurface color={chapterPalette.cream} roughness={0.5} clearcoat={0.16} />
           </mesh>
           <mesh position={[0, -0.6, 0]}>
-            <cylinderGeometry args={[0.34, 0.48, 0.2, 8]} />
-            <Matte color={chapterPalette.ink} />
+            <cylinderGeometry args={[0.34, 0.48, 0.2, 32]} />
+            <StudioSurface color={chapterPalette.ink} roughness={0.38} clearcoat={0.22} />
+          </mesh>
+          <mesh position={[0, 0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.24, 0.035, 10, 40]} />
+            <StudioSurface color={chapterPalette.sky} roughness={0.34} clearcoat={0.3} />
           </mesh>
         </group>
       ))}
       <mesh ref={trailRef}>
-        <tubeGeometry args={[route, 24, 0.035, 5, false]} />
-        <Matte color={chapterPalette.sky} emissive={chapterPalette.sky} emissiveIntensity={0.25} />
+        <tubeGeometry args={[route, 64, 0.035, 10, false]} />
+        <StudioSurface
+          color={chapterPalette.sky}
+          emissive={chapterPalette.sky}
+          emissiveIntensity={0.25}
+          roughness={0.3}
+          clearcoat={0.3}
+        />
       </mesh>
     </group>
   );
@@ -371,30 +426,30 @@ function AboutDiorama({ motionRef }) {
   return (
     <group ref={cameraRef} rotation={[0.08, -0.3, -0.03]}>
       <mesh>
-        <boxGeometry args={[2.25, 1.34, 0.75]} />
-        <Matte color={chapterPalette.moss} />
+        <RoundedGeometry size={[2.25, 1.34, 0.75]} radius={0.18} segments={6} />
+        <StudioSurface color={chapterPalette.moss} roughness={0.46} clearcoat={0.22} />
       </mesh>
       <mesh position={[-0.62, 0.82, -0.05]}>
-        <boxGeometry args={[0.72, 0.35, 0.5]} />
-        <Matte color={chapterPalette.orange} />
+        <RoundedGeometry size={[0.72, 0.35, 0.5]} radius={0.11} segments={5} />
+        <StudioSurface color={chapterPalette.orange} roughness={0.38} clearcoat={0.3} />
       </mesh>
       <group ref={lensRef} position={[0.42, -0.04, 0.58]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.62, 0.72, 0.64, 14]} />
-          <Matte color={chapterPalette.ink} />
+          <cylinderGeometry args={[0.62, 0.72, 0.64, 48]} />
+          <StudioSurface color={chapterPalette.ink} roughness={0.28} metalness={0.09} clearcoat={0.38} />
         </mesh>
-        <mesh position={[0, 0, 0.36]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.43, 0.1, 7, 16]} />
-          <Matte color={chapterPalette.cream} />
+        <mesh position={[0, 0, 0.36]}>
+          <torusGeometry args={[0.43, 0.1, 16, 64]} />
+          <StudioSurface color={chapterPalette.cream} roughness={0.48} clearcoat={0.18} />
         </mesh>
         <mesh position={[0, 0, 0.39]}>
-          <circleGeometry args={[0.34, 12]} />
-          <meshStandardMaterial color={chapterPalette.sky} roughness={0.24} metalness={0.12} />
+          <circleGeometry args={[0.34, 48]} />
+          <StudioSurface color={chapterPalette.sky} roughness={0.18} metalness={0.12} clearcoat={0.52} />
         </mesh>
       </group>
       <mesh position={[-0.75, 0.12, 0.42]}>
-        <cylinderGeometry args={[0.17, 0.17, 0.12, 10]} />
-        <Matte color={chapterPalette.cream} />
+        <sphereGeometry args={[0.17, 28, 18]} />
+        <StudioSurface color={chapterPalette.cream} roughness={0.44} clearcoat={0.24} />
       </mesh>
     </group>
   );
@@ -434,26 +489,50 @@ function ContactDiorama({ motionRef }) {
     <group>
       <group ref={planeRef} position={[-0.45, 0.2, 0.08]} rotation={[0.2, -0.18, -0.12]}>
         <mesh>
-          <extrudeGeometry args={[shape, { depth: 0.08, bevelEnabled: false, steps: 1 }]} />
-          <Matte color={chapterPalette.cream} />
+          <extrudeGeometry
+            args={[
+              shape,
+              {
+                depth: 0.08,
+                bevelEnabled: true,
+                bevelSegments: 4,
+                bevelSize: 0.035,
+                bevelThickness: 0.025,
+                steps: 1,
+              },
+            ]}
+          />
+          <StudioSurface color={chapterPalette.cream} roughness={0.54} clearcoat={0.12} />
         </mesh>
         <mesh position={[-0.32, 0.02, 0.09]} rotation={[0, 0, -0.35]}>
-          <boxGeometry args={[1.02, 0.035, 0.035]} />
-          <Matte color={chapterPalette.orange} />
+          <RoundedGeometry size={[1.02, 0.035, 0.035]} radius={0.016} segments={4} />
+          <StudioSurface color={chapterPalette.orange} roughness={0.36} clearcoat={0.3} />
         </mesh>
       </group>
       <group ref={beaconRef} position={[1.35, -0.62, -0.1]}>
         <mesh>
-          <cylinderGeometry args={[0.22, 0.42, 0.9, 9]} />
-          <Matte color={chapterPalette.moss} />
+          <cylinderGeometry args={[0.22, 0.42, 0.9, 32]} />
+          <StudioSurface color={chapterPalette.moss} roughness={0.48} clearcoat={0.2} />
         </mesh>
         <mesh position={[0, 0.69, 0]}>
-          <sphereGeometry args={[0.26, 10, 7]} />
-          <Matte color={chapterPalette.orange} emissive={chapterPalette.orange} emissiveIntensity={0.5} />
+          <sphereGeometry args={[0.26, 32, 20]} />
+          <StudioSurface
+            color={chapterPalette.orange}
+            emissive={chapterPalette.orange}
+            emissiveIntensity={0.5}
+            roughness={0.28}
+            clearcoat={0.42}
+          />
         </mesh>
         <mesh position={[0, 0.69, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.52, 0.035, 5, 18]} />
-          <Matte color={chapterPalette.sky} emissive={chapterPalette.sky} emissiveIntensity={0.3} />
+          <torusGeometry args={[0.52, 0.035, 12, 64]} />
+          <StudioSurface
+            color={chapterPalette.sky}
+            emissive={chapterPalette.sky}
+            emissiveIntensity={0.3}
+            roughness={0.32}
+            clearcoat={0.3}
+          />
         </mesh>
       </group>
     </group>

@@ -246,7 +246,7 @@ function FloatingPebbles({ activeChapter, motionRef, animationEnabledRef }) {
     transforms.forEach((transform, index) => {
       helper.position.set(transform.position[0], transform.position[1], transform.position[2]);
       helper.rotation.set(transform.rotation[0], transform.rotation[1], transform.rotation[2]);
-      helper.scale.setScalar(transform.scale);
+      helper.scale.set(transform.scale * 1.24, transform.scale * 0.72, transform.scale);
       helper.updateMatrix();
       mesh.setMatrixAt(index, helper.matrix);
     });
@@ -264,8 +264,14 @@ function FloatingPebbles({ activeChapter, motionRef, animationEnabledRef }) {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, transforms.length]} frustumCulled={false}>
-      <dodecahedronGeometry args={[0.16, 0]} />
-      <meshStandardMaterial color="#6E7F55" roughness={0.92} metalness={0.02} />
+      <sphereGeometry args={[0.16, 18, 12]} />
+      <meshPhysicalMaterial
+        color="#6E7F55"
+        roughness={0.74}
+        metalness={0.02}
+        clearcoat={0.06}
+        clearcoatRoughness={0.72}
+      />
     </instancedMesh>
   );
 }
@@ -360,10 +366,12 @@ export function PlaygroundWorld({
 }) {
   return (
     <>
-      <ambientLight intensity={0.78} color="#F2E8D5" />
-      <directionalLight position={[-4, 6, 8]} intensity={2.15} color="#F2E8D5" />
-      <pointLight position={[4, 1, 5]} intensity={2.25} color="#D6683C" />
-      <pointLight position={[-4, -2, 3]} intensity={1.25} color="#6FA8C8" />
+      <ambientLight intensity={0.34} color="#F2E8D5" />
+      <hemisphereLight color="#F2E8D5" groundColor="#0A0D14" intensity={0.74} />
+      <directionalLight position={[-4, 6, 8]} intensity={2.4} color="#F7EEDC" />
+      <directionalLight position={[4, -1, 6]} intensity={0.62} color="#6FA8C8" />
+      <pointLight position={[4, 1, 5]} intensity={1.85} color="#D6683C" />
+      <pointLight position={[-4, -2, 3]} intensity={0.9} color="#6FA8C8" />
 
       <CelestialDust viewportTier={viewportTier} animationEnabledRef={animationEnabledRef} />
       <FloatingPebbles

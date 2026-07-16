@@ -86,7 +86,7 @@ export function SpacePlaygroundScene({
         }}
         gl={{
           alpha: true,
-          antialias: false,
+          antialias: viewportTier !== "mobile",
           depth: true,
           stencil: false,
           powerPreference: "high-performance",
@@ -94,6 +94,7 @@ export function SpacePlaygroundScene({
         }}
         onCreated={({ gl, invalidate }) => {
           gl.setClearColor("#0A0D14", 0);
+          gl.toneMappingExposure = 1.06;
           setReady(true);
           invalidate();
         }}

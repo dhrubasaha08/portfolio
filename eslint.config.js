@@ -8,6 +8,7 @@ import globals from "globals";
 export default [
   {
     ignores: [
+      ".vite/**",
       "coverage/**",
       "dist/**",
       "node_modules/**",
