@@ -119,9 +119,9 @@ function Astronaut({ activeChapter, pointerRef, motionRef, viewportTier, animati
     const mobile = viewportTier === "mobile";
     const tablet = viewportTier === "tablet";
     const hero = chapter === "hero";
-    const cameo = !hero && (progress < 0.28 || progress > 0.72);
+    const cameo = !hero && progress > 0.76;
     const eased = progress * progress * (3 - 2 * progress);
-    const cameoEdge = progress < 0.28 ? 1 - progress / 0.28 : (progress - 0.72) / 0.28;
+    const cameoEdge = MathUtils.clamp((progress - 0.76) / 0.24, 0, 1);
     const float = animationEnabledRef.current
       ? Math.sin(state.clock.elapsedTime * 0.66) * (mobile ? 0.08 : 0.12)
       : 0;
@@ -136,7 +136,7 @@ function Astronaut({ activeChapter, pointerRef, motionRef, viewportTier, animati
     const heroY = mobile
       ? MathUtils.lerp(-1.05, 0.32, eased) + Math.sin(progress * Math.PI * 2) * 0.22
       : MathUtils.lerp(-0.35, 0.58, eased) + Math.sin(progress * Math.PI * 2.4) * 0.34;
-    const direction = progress < 0.28 ? 1 : -1;
+    const direction = -1;
     const cameoX = (mobile ? 2.2 : 4.2) * direction + (1 - cameoEdge) * direction * 0.8;
     const cameoY = mobile ? 2.25 : 2.5;
     const targetScale = normalizedScale * (hero ? 1 : 0.36 * Math.max(0.3, cameoEdge));

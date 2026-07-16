@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import App from "./App";
+import { createCrateredMoonGeometry } from "./components/scene/geometry";
 
 const HEADLINE = "I turn complex workflows into dependable software.";
 const HERO_SUMMARY =
@@ -266,5 +267,32 @@ describe("typography, semantics, and accessibility", () => {
     expect(stylesheet).toMatch(/animation-duration:\s*0\.01ms\s*!important/);
     expect(stylesheet).toMatch(/animation-iteration-count:\s*1\s*!important/);
     expect(stylesheet).toMatch(/scroll-behavior:\s*auto\s*!important/);
+  });
+});
+
+describe("procedural scene geometry", () => {
+  it("deforms one smooth moon surface into crater bowls and rims", () => {
+    const geometry = createCrateredMoonGeometry();
+    const positions = geometry.getAttribute("position");
+    const normals = geometry.getAttribute("normal");
+    let minimumRadius = Number.POSITIVE_INFINITY;
+    let maximumRadius = 0;
+
+    for (let index = 0; index < positions.count; index += 1) {
+      const radius = Math.hypot(
+        positions.getX(index),
+        positions.getY(index),
+        positions.getZ(index),
+      );
+      minimumRadius = Math.min(minimumRadius, radius);
+      maximumRadius = Math.max(maximumRadius, radius);
+    }
+
+    expect(positions.count).toBeGreaterThan(2_000);
+    expect(normals.count).toBe(positions.count);
+    expect(minimumRadius).toBeLessThan(1.16);
+    expect(maximumRadius - minimumRadius).toBeGreaterThan(0.08);
+
+    geometry.dispose();
   });
 });

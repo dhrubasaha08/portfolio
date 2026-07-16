@@ -1,4 +1,4 @@
-import { Color } from "three";
+import { Color, MathUtils, SphereGeometry, Vector3 } from "three";
 
 function seededRandom(seed) {
   let state = seed >>> 0;
@@ -40,7 +40,49 @@ export function createCelestialDust(viewportTier) {
 }
 
 /**
- * Low-poly celestial pebbles echo the crater artwork without adding another
+ * Builds the moon as one smooth surface and pushes crater bowls into that
+ * surface. This avoids separate rings intersecting the globe while it rotates.
+ *
+ * @param {number} radius
+ * @returns {SphereGeometry}
+ */
+export function createCrateredMoonGeometry(radius = 1.22) {
+  const geometry = new SphereGeometry(radius, 64, 40);
+  const positions = geometry.getAttribute("position");
+  const vertex = new Vector3();
+  const direction = new Vector3();
+  const craters = [
+    { normal: new Vector3(0.52, 0.54, 1.02).normalize(), radius: 0.32, depth: 0.105 },
+    { normal: new Vector3(-0.58, 0.28, 1.04).normalize(), radius: 0.36, depth: 0.12 },
+    { normal: new Vector3(0.08, -0.62, 1.1).normalize(), radius: 0.28, depth: 0.09 },
+    { normal: new Vector3(0.78, -0.28, 0.84).normalize(), radius: 0.22, depth: 0.072 },
+  ];
+
+  for (let index = 0; index < positions.count; index += 1) {
+    vertex.fromBufferAttribute(positions, index);
+    direction.copy(vertex).normalize();
+    let displacement = 0;
+
+    for (const crater of craters) {
+      const angle = Math.acos(MathUtils.clamp(direction.dot(crater.normal), -1, 1));
+      if (angle >= crater.radius) continue;
+      const phase = angle / crater.radius;
+      const bowl = -crater.depth * (1 - phase * phase) ** 2;
+      const rim = crater.depth * 0.28 * Math.exp(-(((phase - 0.84) / 0.11) ** 2));
+      displacement += bowl + rim;
+    }
+
+    vertex.copy(direction).multiplyScalar(radius + displacement);
+    positions.setXYZ(index, vertex.x, vertex.y, vertex.z);
+  }
+
+  positions.needsUpdate = true;
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/**
+ * Smooth celestial pebbles echo the crater artwork without adding another
  * downloaded model or a polished interface motif.
  *
  * @returns {readonly {

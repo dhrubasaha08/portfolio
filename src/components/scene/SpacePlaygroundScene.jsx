@@ -86,7 +86,7 @@ export function SpacePlaygroundScene({
         }}
         gl={{
           alpha: true,
-          antialias: viewportTier !== "mobile",
+          antialias: true,
           depth: true,
           stencil: false,
           powerPreference: "high-performance",

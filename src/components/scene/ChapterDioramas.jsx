@@ -2,6 +2,7 @@ import { MathUtils, Shape, Vector3, CatmullRomCurve3 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chapterPalette, normalizeChapter } from "./chapterConfig";
+import { createCrateredMoonGeometry } from "./geometry";
 import { RoundedGeometry, StudioSurface } from "./ScenePrimitives";
 
 /**
@@ -38,6 +39,17 @@ const desktopLayouts = Object.freeze({
 });
 
 /** @type {Readonly<Record<string, DioramaLayout>>} */
+const tabletLayouts = Object.freeze({
+  impact: { x: 1.75, y: -2.3, scale: 0.55 },
+  practice: { x: 1.3, y: -2.05, scale: 0.55 },
+  kyber: { x: -1.7, y: -0.2, scale: 0.68 },
+  tremor: { x: -1.45, y: -0.15, scale: 0.65 },
+  experience: { x: 1.75, y: -2.3, scale: 0.46 },
+  about: { x: 1.7, y: -2.45, scale: 0.48 },
+  contact: { x: 1.65, y: -0.55, scale: 0.64 },
+});
+
+/** @type {Readonly<Record<string, DioramaLayout>>} */
 const mobileLayouts = Object.freeze({
   impact: { x: 1.25, y: -2.35, scale: 0.44, travel: 6 },
   practice: { x: 1.15, y: -2.4, scale: 0.42, travel: 8 },
@@ -54,11 +66,18 @@ const mobileLayouts = Object.freeze({
  * different editorial layout.
  *
  * @param {import('./chapterConfig').ChapterId} chapter
- * @param {boolean} mobile
+ * @param {string} viewportTier
  */
-function getDioramaLayout(chapter, mobile) {
-  const layouts = mobile ? mobileLayouts : desktopLayouts;
-  return layouts[chapter] ?? { x: mobile ? 1.1 : 3.2, y: mobile ? -2.3 : -1.7, scale: mobile ? 0.44 : 0.72 };
+function getDioramaLayout(chapter, viewportTier) {
+  const layouts = viewportTier === "mobile"
+    ? mobileLayouts
+    : viewportTier === "tablet" ? tabletLayouts : desktopLayouts;
+  const fallback = viewportTier === "mobile"
+    ? { x: 1.1, y: -2.3, scale: 0.44 }
+    : viewportTier === "tablet"
+      ? { x: 1.6, y: -2, scale: 0.56 }
+      : { x: 3.2, y: -1.7, scale: 0.72 };
+  return layouts[chapter] ?? fallback;
 }
 
 /** @param {{motionRef: MutableRef<ChapterMotionState>}} props */
@@ -283,6 +302,9 @@ function KyberDiorama({ motionRef }) {
 function TremorDiorama({ motionRef }) {
   const moonRef = useRef(/** @type {import('three').Group | null} */ (null));
   const orbitRef = useRef(/** @type {import('three').Group | null} */ (null));
+  const moonGeometry = useMemo(() => createCrateredMoonGeometry(), []);
+
+  useEffect(() => () => moonGeometry.dispose(), [moonGeometry]);
 
   useFrame((state) => {
     const progress = clamp01(motionRef.current.progress);
@@ -294,31 +316,9 @@ function TremorDiorama({ motionRef }) {
     <group position={[0, 0.02, 0]}>
       <group ref={moonRef}>
         <mesh>
-          <sphereGeometry args={[1.22, 48, 32]} />
+          <primitive object={moonGeometry} attach="geometry" />
           <StudioSurface color="#B7AD9B" roughness={0.8} clearcoat={0.03} />
         </mesh>
-        {[
-          [0.52, 0.54, 1.02, 0.2, -0.44, 0.42],
-          [-0.58, 0.28, 1.04, 0.25, -0.24, -0.48],
-          [0.08, -0.62, 1.1, 0.18, 0.52, 0.07],
-          [0.78, -0.28, 0.84, 0.13, 0.23, 0.7],
-        ].map(([x, y, z, scale, rotationX, rotationY]) => (
-          <group
-            key={`${x}-${y}`}
-            position={[x, y, z]}
-            rotation={[rotationX, rotationY, 0]}
-            scale={scale}
-          >
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.66, 0.7, 0.05, 32]} />
-              <StudioSurface color="#777064" roughness={0.9} clearcoat={0} />
-            </mesh>
-            <mesh position={[0, 0, 0.045]}>
-              <torusGeometry args={[0.72, 0.13, 12, 48]} />
-              <StudioSurface color="#A69C89" roughness={0.82} clearcoat={0.02} />
-            </mesh>
-          </group>
-        ))}
       </group>
       <group ref={orbitRef} rotation={[0.48, 0.12, 0]}>
         <mesh>
@@ -563,7 +563,7 @@ function Diorama({ chapter, motionRef, viewportTier }) {
 function DioramaLayer({ chapter, transitionRole, motionRef, pointerRef, viewportTier }) {
   const groupRef = useRef(/** @type {import('three').Group | null} */ (null));
   const mobile = viewportTier === "mobile";
-  const layout = getDioramaLayout(chapter, mobile);
+  const layout = getDioramaLayout(chapter, viewportTier);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -628,6 +628,12 @@ export function ChapterDioramas({ activeChapter, motionRef, pointerRef, viewport
     const frame = requestAnimationFrame(() => setPrevious(outgoing));
     return () => cancelAnimationFrame(frame);
   }, [active]);
+
+  useEffect(() => {
+    if (previous === null) return undefined;
+    const timeout = window.setTimeout(() => setPrevious(null), 650);
+    return () => window.clearTimeout(timeout);
+  }, [previous]);
 
   return (
     <>

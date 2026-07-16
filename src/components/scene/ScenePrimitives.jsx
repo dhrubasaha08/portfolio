@@ -39,8 +39,20 @@ export function StudioSurface({
   emissiveIntensity = 0,
   roughness = 0.58,
   metalness = 0.035,
-  clearcoat = 0.16,
+  clearcoat = 0,
 }) {
+  if (clearcoat < 0.32) {
+    return (
+      <meshStandardMaterial
+        color={color}
+        emissive={emissive}
+        emissiveIntensity={emissiveIntensity}
+        roughness={roughness}
+        metalness={metalness}
+      />
+    );
+  }
+
   return (
     <meshPhysicalMaterial
       color={color}
