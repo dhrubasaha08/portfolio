@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:e2e": "npm run build && npm run budget && playwright test",
     "test:e2e:built": "playwright test",
+    "capture:handoff": "node scripts/capture-handoff.mjs",
     "budget": "node scripts/check-build-budget.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget && npm run test:e2e:built"
   },

@@ -1,0 +1,194 @@
+.chapter-artwork {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  touch-action: pan-y;
+  contain: layout paint;
+}
+
+.chapter > .chapter-artwork {
+  position: absolute;
+  z-index: 1;
+}
+
+.chapter-artwork svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.impact-heading,
+.impact-body,
+.impact-result,
+.impact-footnotes,
+.practice-heading,
+.practice-statements,
+.project-copy,
+.experience-heading,
+.experience-list,
+.about-copy,
+.photography,
+.contact-copy {
+  position: relative;
+  z-index: 4;
+}
+
+.impact-before,
+.impact-after,
+.impact-result i,
+.practice-statements article,
+.experience-list article {
+  transform: none;
+}
+
+.chapter-artwork-hero {
+  inset: 0;
+  width: 100%;
+  height: 100svh;
+}
+
+.art-hero-layer,
+.art-hero-trails {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.art-hero-stars { transform: translate3d(calc(var(--pointer-x) * -4px), calc(var(--chapter-progress) * -1.5vh), 0) scale(1.06); }
+.art-hero-planets { transform: translate3d(calc(var(--pointer-x) * -10px), calc(var(--chapter-progress) * 3vh), 0) scale(1.07); }
+.art-hero-sun { transform: translate3d(calc(var(--pointer-x) * 6px), calc(var(--chapter-progress) * 5vh), 0) scale(1.07); }
+.art-hero-mountain-far { transform: translate3d(calc(var(--chapter-progress) * -3vw), calc(var(--chapter-progress) * 6vh), 0) scale(1.08); }
+.art-hero-mountain-near { transform: translate3d(calc(var(--chapter-progress) * 4vw), calc(var(--chapter-progress) * 10vh), 0) scale(1.09); }
+.art-hero-crater { transform: translate3d(calc(var(--chapter-progress) * -2vw), calc(var(--chapter-progress) * 14vh), 0) scale(1.1); }
+
+.art-hero-trails {
+  z-index: 7;
+  opacity: 0.32;
+}
+
+.art-hero-trails path {
+  fill: none;
+  stroke: var(--cream);
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--chapter-progress));
+}
+
+.chapter-artwork:not(.chapter-artwork-hero) {
+  width: min(50vw, 47rem);
+  aspect-ratio: 1.2;
+}
+
+.chapter-artwork-work svg,
+.chapter-artwork-practice svg,
+.chapter-artwork-kyber svg,
+.chapter-artwork-tremor svg,
+.chapter-artwork-experience svg,
+.chapter-artwork-about svg,
+.chapter-artwork-contact svg {
+  filter: drop-shadow(0 1.2rem 1.8rem rgb(10 13 20 / 12%));
+}
+
+.chapter-artwork path,
+.chapter-artwork circle,
+.chapter-artwork ellipse,
+.chapter-artwork rect {
+  vector-effect: non-scaling-stroke;
+}
+
+.chapter-artwork-work { color: var(--ink); }
+.art-sun-disc { fill: var(--orange); opacity: 0.4; }
+.art-process-path { fill: none; stroke: currentColor; stroke-width: 4; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+.art-paper > path:first-child { fill: var(--cream); stroke: currentColor; stroke-width: 3; }
+.art-paper > path:last-child { fill: none; stroke: currentColor; stroke-width: 2; opacity: 0.55; }
+.art-clock circle:first-child { fill: var(--sky); stroke: currentColor; stroke-width: 4; }
+.art-clock circle:last-child { fill: currentColor; }
+.art-clock path { stroke: currentColor; stroke-width: 5; stroke-linecap: round; transform-origin: 466px 258px; }
+.art-review-stamp circle { fill: var(--cream); stroke: currentColor; stroke-width: 3; }
+.art-review-stamp text { fill: currentColor; font: 700 12px Montserrat, sans-serif; letter-spacing: 2px; }
+
+.chapter-artwork-practice { color: var(--cream); }
+.art-landscape-line { fill: none; stroke-width: 68; opacity: 0.16; }
+.art-landscape-line-one { stroke: var(--sky); }
+.art-landscape-line-two { stroke: var(--moss); }
+.art-pipe, .art-wheel path, .art-wheel circle { fill: none; stroke: var(--sky); stroke-width: 8; }
+.art-pipe { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+.art-toolbox > path:first-child { fill: var(--moss); stroke: currentColor; stroke-width: 4; }
+.art-toolbox > path:nth-child(2), .art-toolbox circle { fill: none; stroke: currentColor; stroke-width: 5; }
+.art-prism > path:first-child { fill: rgb(111 168 200 / 55%); stroke: currentColor; stroke-width: 4; }
+.art-prism-ray { fill: none; stroke-width: 5; }
+.art-prism-ray-in { stroke: var(--cream); }
+.art-prism-ray-one { stroke: var(--orange); }
+.art-prism-ray-two { stroke: var(--sky); }
+.art-prism-ray-three { stroke: var(--moss); }
+
+.chapter-artwork-kyber { color: var(--ink); }
+.art-kyber-sun { fill: var(--orange); stroke: currentColor; stroke-width: 3; }
+.art-kyber-horizon { fill: none; stroke: currentColor; stroke-width: 5; }
+.art-boundary rect { fill: none; stroke: var(--orange); stroke-width: 9; }
+.art-monolith { fill: var(--midnight); stroke: currentColor; stroke-width: 4; }
+.art-kyber-letter { fill: var(--cream); font: 800 180px Montserrat, sans-serif; }
+
+.chapter-artwork-tremor { color: var(--ink); }
+.art-moon > circle:first-child { fill: var(--cream); stroke: currentColor; stroke-width: 5; }
+.art-crater { fill: var(--sky); stroke: currentColor; stroke-width: 3; }
+.art-moon-shadow { fill: rgb(16 26 46 / 17%); }
+.art-orbit { fill: none; stroke: currentColor; stroke-width: 4; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+.art-event-marker circle { fill: var(--orange); stroke: currentColor; stroke-width: 4; }
+.art-event-marker path, .art-seismic-line { fill: none; stroke: currentColor; stroke-width: 4; }
+.art-seismic-line { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+
+.chapter-artwork-experience { color: var(--cream); }
+.art-route, .art-route-orbit { fill: none; stroke: var(--orange); stroke-width: 5; }
+.art-route { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+.art-route-orbit { opacity: 0.28; }
+.art-wayfinder path { fill: var(--moss); stroke: currentColor; stroke-width: 4; }
+.art-wayfinder circle { fill: var(--orange); stroke: currentColor; stroke-width: 4; }
+.art-route-stop { fill: var(--sky); stroke: currentColor; stroke-width: 3; }
+
+.chapter-artwork-about { color: var(--ink); }
+.art-photo-sun { fill: var(--orange); opacity: 0.72; }
+.art-photo-horizon { fill: none; stroke-width: 78; opacity: 0.2; }
+.art-photo-horizon-one { stroke: var(--sky); }
+.art-photo-horizon-two { stroke: var(--moss); }
+.art-camera > path:first-child { fill: var(--moss); stroke: currentColor; stroke-width: 5; }
+.art-camera > path:nth-child(2), .art-camera > rect, .art-camera > circle { fill: var(--cream); stroke: currentColor; stroke-width: 5; }
+.art-camera > circle:nth-of-type(2) { fill: var(--sky); }
+.art-shutter path { fill: var(--midnight); stroke: var(--cream); stroke-width: 2; }
+
+.chapter-artwork-contact { color: var(--ink); }
+.art-contact-star { fill: currentColor; }
+.art-contact-horizon { fill: var(--midnight); opacity: 0.18; }
+.art-plane-route { fill: none; stroke: currentColor; stroke-width: 3; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+.art-paper-plane path { fill: var(--cream); stroke: currentColor; stroke-width: 4; }
+.art-beacon path:first-child { fill: var(--moss); stroke: currentColor; stroke-width: 4; }
+.art-beacon circle { fill: var(--cream); stroke: currentColor; stroke-width: 4; }
+.art-beacon-wave { fill: none; stroke: var(--sky); stroke-width: 5; }
+
+#main-content[data-motion-mode="reduced"] .chapter-artwork *,
+#main-content[data-motion-mode="save-data"] .chapter-artwork * {
+  transform: none !important;
+  stroke-dashoffset: 0 !important;
+  transition: none !important;
+}
+
+@media (max-width: 767px) {
+  .art-hero-layer, .art-hero-trails { inset: -8%; width: 116%; height: 116%; object-position: 62% center; }
+  .chapter-artwork:not(.chapter-artwork-hero) { width: min(92vw, 31rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-artwork * { transform: none !important; stroke-dashoffset: 0 !important; transition: none !important; }
+}
+
+@media print {
+  .chapter-artwork { display: none !important; }
+}

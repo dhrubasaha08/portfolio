@@ -54,8 +54,8 @@
  */
 
 /**
- * The ordered document chapters that participate in the shared 2D and 3D
- * motion system.
+ * The ordered document chapters that participate in the shared artwork motion
+ * system.
  *
  * @typedef {"home" | "work" | "practice" | "project-kyber" | "tremor-track" | "experience" | "about" | "contact"} ChapterId
  */
@@ -65,13 +65,17 @@
  */
 
 /**
- * Mutable pointer input shared with the decorative scene without triggering
- * React renders on every pointer event.
+ * Mutable pointer input shared with decorative artwork and the astronaut
+ * without triggering React renders on every pointer event.
  *
- * @typedef {Object} ScenePointer
+ * @typedef {Object} ArtworkPointer
  * @property {number} x Normalized viewport x position from -1 to 1.
  * @property {number} y Normalized viewport y position from -1 to 1.
  * @property {number} impulse Decaying tap/pointer impulse from 0 to 1.
+ */
+
+/**
+ * @typedef {"journey" | "cameos" | "hero"} AstronautPresence
  */
 
 /**

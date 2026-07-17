@@ -1,0 +1,154 @@
+#main-content[data-portfolio-variant="cinematic-storybook"] {
+  --story-gutter: clamp(1.25rem, 7vw, 8rem);
+}
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .hero {
+  min-height: 210svh;
+}
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .hero-copy {
+  max-width: 64rem;
+}
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .impact,
+#main-content[data-portfolio-variant="cinematic-storybook"] .practice,
+#main-content[data-portfolio-variant="cinematic-storybook"] .project-story,
+#main-content[data-portfolio-variant="cinematic-storybook"] .experience,
+#main-content[data-portfolio-variant="cinematic-storybook"] .about,
+#main-content[data-portfolio-variant="cinematic-storybook"] .contact {
+  min-height: 150svh;
+}
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-work {
+  right: -6vw;
+  top: 50%;
+  bottom: auto;
+  transform: translate3d(calc(var(--pointer-x) * 8px), calc(-50% + 6vh - var(--chapter-progress) * 12vh), 0);
+}
+
+.art-paper-one { transform: translate3d(calc((1 - var(--chapter-enter)) * -150px), calc((1 - var(--chapter-enter)) * 70px), 0) rotate(calc(-12deg + var(--chapter-progress) * 9deg)); transform-origin: center; }
+.art-paper-two { transform: translate3d(calc((1 - var(--chapter-enter)) * -90px), calc((1 - var(--chapter-enter)) * 110px), 0) rotate(calc(10deg - var(--chapter-progress) * 8deg)); transform-origin: center; }
+.art-clock { transform: rotate(calc(var(--chapter-progress) * 10deg)); transform-origin: 466px 258px; }
+.art-clock-hour { transform: rotate(calc(var(--chapter-progress) * 210deg)); }
+.art-clock-minute { transform: rotate(calc(var(--chapter-progress) * 690deg)); }
+.art-review-stamp { transform: translateY(calc((1 - var(--chapter-enter)) * 80px)) rotate(calc(-18deg + var(--chapter-progress) * 22deg)) scale(calc(0.72 + var(--chapter-enter) * 0.28)); transform-origin: center; }
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-practice {
+  left: -7vw;
+  bottom: 0;
+  width: min(58vw, 52rem);
+  transform: translate3d(calc(var(--chapter-progress) * -3vw), calc((1 - var(--chapter-enter)) * 10vh), 0);
+  opacity: 0.88;
+}
+
+.art-wheel { transform-box: fill-box; transform-origin: center; transform: rotate(calc(var(--chapter-progress) * 240deg)); }
+.art-toolbox { transform: translate3d(0, calc((1 - var(--chapter-enter)) * 130px), 0); }
+.art-prism { transform: translate3d(calc((1 - var(--chapter-enter)) * 110px), calc((1 - var(--chapter-enter)) * -40px), 0); }
+.art-prism-ray { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .project-story:nth-of-type(even) .project-copy { order: -1; }
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-kyber,
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-tremor {
+  position: relative;
+  inset: auto;
+  width: min(48vw, 44rem);
+  justify-self: center;
+}
+
+.art-boundary-one { transform: translate3d(calc((1 - var(--chapter-enter)) * -170px), calc((1 - var(--chapter-enter)) * -80px), 0) rotate(calc(-5deg + var(--chapter-progress) * 5deg)); transform-origin: center; }
+.art-boundary-two { transform: translate3d(calc((1 - var(--chapter-enter)) * 170px), calc((1 - var(--chapter-enter)) * 90px), 0) rotate(calc(5deg - var(--chapter-progress) * 5deg)); transform-origin: center; }
+.art-monolith { transform: translateY(calc((1 - var(--chapter-enter)) * 190px)); transform-origin: center; }
+.art-kyber-sun { transform: translate3d(calc(var(--chapter-progress) * 40px), calc(var(--chapter-progress) * 52px), 0); }
+.art-kyber-letter { transform: translateY(calc((1 - var(--chapter-enter)) * 95px)); }
+
+.art-moon { transform-box: fill-box; transform-origin: center; transform: rotate(calc(-12deg + var(--chapter-progress) * 34deg)); }
+.art-event-marker { transform: translate3d(calc((1 - var(--chapter-enter)) * 110px), calc((1 - var(--chapter-enter)) * -60px), 0) scale(calc(0.6 + var(--chapter-enter) * 0.4)); transform-origin: center; }
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-experience {
+  right: 1vw;
+  top: 17%;
+  width: min(42vw, 39rem);
+  opacity: 0.72;
+  transform: translate3d(calc(var(--pointer-x) * 7px), calc((0.5 - var(--chapter-progress)) * 9vh), 0);
+}
+
+.art-wayfinder-one { transform: translateY(calc((1 - var(--chapter-enter)) * 130px)); }
+.art-wayfinder-two { transform: translateY(calc((1 - var(--chapter-enter)) * -130px)); }
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-about {
+  right: -5vw;
+  bottom: 1%;
+  width: min(52vw, 48rem);
+  opacity: 0.78;
+  transform: translate3d(calc(var(--chapter-progress) * -4vw), calc((1 - var(--chapter-enter)) * 12vh), 0);
+}
+
+.art-camera { transform: translateY(calc((1 - var(--chapter-enter)) * 120px)) rotate(calc(-4deg + var(--chapter-progress) * 4deg)); transform-origin: center; }
+.art-shutter { transform-box: fill-box; transform-origin: center; transform: rotate(calc(var(--chapter-progress) * 150deg)) scale(calc(0.78 + var(--chapter-enter) * 0.22)); }
+
+#main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-contact {
+  inset: 0 0 0 auto;
+  width: min(58vw, 54rem);
+  height: 100%;
+}
+
+.art-contact-star { transform: translate3d(calc((0.5 - var(--chapter-progress)) * 90px), calc((0.5 - var(--chapter-progress)) * 70px), 0); }
+.art-paper-plane { transform: translate3d(calc((1 - var(--chapter-enter)) * -180px), calc((1 - var(--chapter-enter)) * 130px), 0) rotate(calc(-12deg + var(--chapter-progress) * 12deg)); transform-origin: center; }
+.art-contact-horizon { transform: translateY(calc((1 - var(--chapter-enter)) * 150px)); }
+.art-beacon-wave { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--chapter-enter)); }
+
+@media (max-width: 900px) {
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-work,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-practice,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-experience,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-about,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-contact {
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 680px) {
+  #main-content[data-portfolio-variant="cinematic-storybook"] .hero { min-height: 175svh; }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .impact,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .practice,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .project-story,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .experience,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .about,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .contact { min-height: auto; }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .impact {
+    grid-template-areas: "heading" "body" "art" "result" "foot";
+  }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-work {
+    position: relative;
+    inset: auto;
+    grid-area: art;
+    width: min(92vw, 30rem);
+    margin: -1rem auto 1rem;
+    opacity: 0.82;
+    transform: translate3d(calc(var(--pointer-x) * 3px), calc(8px - var(--chapter-progress) * 16px), 0);
+  }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-practice,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-experience,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-about,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-contact {
+    position: relative;
+    inset: auto;
+    width: min(92vw, 30rem);
+    height: auto;
+    margin: 1.5rem auto 2.5rem;
+    opacity: 0.78;
+    transform: translate3d(0, calc(8px - var(--chapter-progress) * 16px), 0);
+  }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .practice,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .experience,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .contact {
+    display: flex;
+    flex-direction: column;
+  }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .about {
+    display: flex;
+    flex-direction: column;
+  }
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-kyber,
+  #main-content[data-portfolio-variant="cinematic-storybook"] .chapter-artwork-tremor { width: min(90vw, 31rem); }
+}

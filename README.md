@@ -2,7 +2,7 @@
 
 A chapter-driven illustrated-space portfolio focused on dependable software, backend automation, internal tools, and selective applied AI.
 
-The experience combines semantic HTML with layered 2.5D artwork and one lazily loaded, page-wide React Three Fiber scene. Native scrolling moves through eight visual chapters, from the astronaut-led landscape to small procedural dioramas for current work, Project Kyber, Tremor Track, experience, photography, and contact. All readable content and navigation remain in the document; WebGL is optional visual enhancement.
+The experience combines semantic HTML with eight section-owned, scroll-animated 2D compositions and one lazily loaded astronaut scene. Native scrolling moves from the illustrated landscape through current work, Project Kyber, Tremor Track, experience, photography, and contact. All readable content and navigation remain in the document; WebGL is optional visual enhancement.
 
 ## Local development
 
@@ -31,7 +31,7 @@ npm run check
 
 - React 18 and Vite
 - Structured, JSDoc-checked public content
-- One persistent, lazy React Three Fiber canvas with chapter-specific procedural dioramas
+- Eight authored SVG/DOM chapter illustrations and one lazy astronaut-only React Three Fiber canvas
 - A requestAnimationFrame-based chapter controller that publishes normalized motion through data attributes and CSS custom properties
 - Native document scrolling and semantic navigation
 - Reduced-motion, data-saving, and WebGL failure modes
@@ -39,7 +39,7 @@ npm run check
 
 ## Publishing
 
-The source branch is `dev`. The publish workflow validates approved `dev` changes, copies `public/CNAME` into the build output, and publishes `dist` to the legacy `build` branch. `agent/**` branches, including `agent/animated-space-playground`, run validation only and cannot deploy.
+The source branch is `dev`. The publish workflow validates approved `dev` changes, copies `public/CNAME` into the build output, and publishes `dist` to the legacy `build` branch. `agent/**` branches run validation only and cannot deploy.
 
 ## Credits
 

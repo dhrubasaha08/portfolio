@@ -9,6 +9,5 @@ Attribution 4.0 license.
 
 The star, planet, sun, mountain, and crater layers are the portfolio's original
 SVG illustrations, recoloured for the personal-space-playground composition.
-The sparse celestial dust, smooth pebbles, and rounded chapter dioramas are
-generated procedurally by the application. No additional model or texture is
-downloaded.
+Every chapter environment and object is authored as 2D SVG/DOM artwork. The
+astronaut is the only model; no additional model or texture is downloaded.

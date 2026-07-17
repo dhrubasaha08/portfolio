@@ -1,4 +1,5 @@
 import SceneBoundary from "./components/SceneBoundary";
+import ChapterArtwork from "./components/ChapterArtwork";
 import SiteNav from "./components/SiteNav";
 import {
   about,
@@ -12,6 +13,7 @@ import {
   practiceStatements,
 } from "./data/content";
 import { useChapterMotion } from "./hooks/useChapterMotion";
+import { portfolioVariant } from "./config/variant";
 
 /** @param {{link: import("./data/types.js").EvidenceLink | import("./data/types.js").ContactLink}} props */
 function TextLink({ link }) {
@@ -36,7 +38,6 @@ function TextLink({ link }) {
  * }} props
  */
 function ProjectStory({ study, chapterRef }) {
-  const isPrivate = study.visibility === "private-rnd";
   return (
     <section
       id={study.id}
@@ -45,26 +46,7 @@ function ProjectStory({ study, chapterRef }) {
       className={`chapter project-story project-story-${study.id}`}
       aria-labelledby={`${study.id}-heading`}
     >
-      <div className="project-scenery" aria-hidden="true">
-        {isPrivate ? (
-          <>
-            <span className="kyber-sun" />
-            <span className="kyber-horizon kyber-horizon-far" />
-            <span className="kyber-horizon kyber-horizon-near" />
-            <strong>K</strong>
-          </>
-        ) : (
-          <>
-            <span className="tremor-moon">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="tremor-path" />
-            <span className="tremor-marker" />
-          </>
-        )}
-      </div>
+      <ChapterArtwork chapter={/** @type {import('./data/types.js').ChapterId} */ (study.id)} />
       <div className="project-copy">
         <p className="plain-label">{study.status}</p>
         <h2 id={`${study.id}-heading`}>{study.title}</h2>
@@ -104,6 +86,7 @@ function App() {
       <div className="global-scene-layer" aria-hidden="true">
         <SceneBoundary
           activeChapter={activeChapter}
+          presence={portfolioVariant.astronautPresence}
           motionRef={motionRef}
           pointerRef={pointerRef}
           viewportTier={viewportTier}
@@ -111,7 +94,13 @@ function App() {
         />
       </div>
 
-      <main id="main-content" ref={motionRootRef} tabIndex={-1}>
+      <main
+        id="main-content"
+        ref={motionRootRef}
+        tabIndex={-1}
+        data-portfolio-variant={portfolioVariant.id}
+        data-astronaut-presence={portfolioVariant.astronautPresence}
+      >
         <section
           id="home"
           ref={registerChapter("home")}
@@ -120,6 +109,7 @@ function App() {
           aria-labelledby="hero-heading"
         >
           <div className="hero-sticky">
+            <ChapterArtwork chapter="home" />
             <div className="hero-copy">
               <p className="hero-eyebrow">{hero.eyebrow}</p>
               <h1 id="hero-heading">{hero.headline}</h1>
@@ -140,11 +130,7 @@ function App() {
           className="chapter impact"
           aria-labelledby="impact-heading"
         >
-          <div className="impact-scenery" aria-hidden="true">
-            <span className="impact-sun" />
-            <span className="impact-orbit" />
-            <span className="impact-review-seal">review</span>
-          </div>
+          <ChapterArtwork chapter="work" />
           <div className="impact-heading">
             <p className="plain-label">Current work</p>
             <h2 id="impact-heading">{impactCaseStudy.title}</h2>
@@ -171,11 +157,7 @@ function App() {
           className="chapter practice"
           aria-labelledby="practice-heading"
         >
-          <div className="practice-landscape" aria-hidden="true">
-            <span className="practice-band practice-band-sky" />
-            <span className="practice-band practice-band-far" />
-            <span className="practice-band practice-band-near" />
-          </div>
+          <ChapterArtwork chapter="practice" />
           <div className="practice-heading">
             <p className="plain-label">What I build now</p>
             <h2 id="practice-heading">Software for work that needs to hold together.</h2>
@@ -208,11 +190,7 @@ function App() {
           className="chapter experience"
           aria-labelledby="experience-heading"
         >
-          <div className="experience-route" aria-hidden="true">
-            <span className="experience-route-line" />
-            <span className="experience-route-stop experience-route-stop-first" />
-            <span className="experience-route-stop experience-route-stop-last" />
-          </div>
+          <ChapterArtwork chapter="experience" />
           <div className="experience-heading">
             <p className="plain-label">Experience</p>
             <h2 id="experience-heading">Learning the system, then making it better.</h2>
@@ -221,13 +199,14 @@ function App() {
             {experienceEntries.map((entry, index) => (
               <article
                 key={entry.id}
+                data-experience-id={entry.id}
                 style={/** @type {import("react").CSSProperties} */ ({ "--experience-index": index })}
               >
                 <div className="experience-title">
-                  <p>{entry.current ? "Current" : entry.period}</p>
-                  <h3>{entry.role}</h3>
+                  <p>{entry.current ? entry.location : entry.period}</p>
+                  <h3>{entry.role}{entry.current ? " · Current" : ""}</h3>
                   {entry.organization ? <span>{entry.organization}</span> : null}
-                  <span>{entry.location}</span>
+                  {!entry.current ? <span>{entry.location}</span> : null}
                 </div>
                 <div className="experience-description">
                   <p>{entry.summary}</p>
@@ -247,17 +226,13 @@ function App() {
           className="chapter about"
           aria-labelledby="about-heading"
         >
-          <div className="about-horizon" aria-hidden="true">
-            <span />
-            <span />
-          </div>
+          <ChapterArtwork chapter="about" />
           <div className="about-copy">
             <p className="plain-label">About</p>
             <h2 id="about-heading">{about.title}</h2>
             {about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           </div>
           <aside className="photography" aria-labelledby="photography-heading">
-            <span className="photography-sun" aria-hidden="true" />
             <p className="plain-label">Photography</p>
             <h3 id="photography-heading">{about.photography.title}</h3>
             <p>{about.photography.body}</p>
@@ -271,15 +246,7 @@ function App() {
           className="chapter contact"
           aria-labelledby="contact-heading"
         >
-          <div className="contact-scenery" aria-hidden="true">
-            <span className="contact-horizon" />
-            {Array.from({ length: 8 }, (_, index) => (
-              <i
-                key={index}
-                style={/** @type {import("react").CSSProperties} */ ({ "--star-index": index })}
-              />
-            ))}
-          </div>
+          <ChapterArtwork chapter="contact" />
           <div className="contact-copy">
             <p className="plain-label">Contact</p>
             <h2 id="contact-heading">Have a difficult workflow worth untangling?</h2>

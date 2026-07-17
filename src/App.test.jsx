@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import App from "./App";
-import { createCrateredMoonGeometry } from "./components/scene/geometry";
+import { getAstronautCue } from "./components/scene/astronautCue";
 
 const HEADLINE = "I turn complex workflows into dependable software.";
 const HERO_SUMMARY =
@@ -72,8 +72,11 @@ describe("approved portfolio narrative", () => {
       "href",
       "mailto:contact@dhrubasaha.co.in",
     );
-    expect(container).toHaveTextContent(/Software Engineer · Applied AI & Automation/i);
-    expect(container).toHaveTextContent(/Current/i);
+    const currentRole = container.querySelector('[data-experience-id="current-role"]');
+    expect(currentRole).toHaveTextContent(
+      "Software Engineer · Applied AI & Automation · Current",
+    );
+    expect(currentRole).toHaveTextContent("Germany");
   });
 
   it("keeps the approved story, metric, and projects in order", () => {
@@ -94,6 +97,10 @@ describe("approved portfolio narrative", () => {
 
     expect(screen.getByText("≈ 8 hours")).toBeInTheDocument();
     expect(screen.getByText("≈ 5 minutes")).toBeInTheDocument();
+    expect(container.querySelector(".impact-result")).toHaveAttribute(
+      "aria-label",
+      "Approximately eight hours reduced to approximately five minutes",
+    );
     expect(container).toHaveTextContent(/approximately eight hours/i);
     expect(container).toHaveTextContent(/approximately five minutes/i);
     expect(container).toHaveTextContent(/Expert review remains/i);
@@ -128,8 +135,8 @@ describe("approved portfolio narrative", () => {
   it("omits retired career, confidential claims, and AI-dashboard controls", () => {
     const { container } = renderPortfolio();
     const navigation = screen.getByRole("navigation", { name: /primary/i });
-    const renderedText = container.textContent ?? "";
-    const renderedMarkup = container.innerHTML;
+    const renderedText = document.documentElement.textContent ?? "";
+    const renderedMarkup = `${document.documentElement.innerHTML}\n${readFileSync("index.html", "utf8")}`;
 
     expect(navigation).not.toHaveTextContent(/\b0[1-9]\b/);
     expect(container.querySelector("button")).not.toBeInTheDocument();
@@ -143,7 +150,7 @@ describe("approved portfolio narrative", () => {
       /Arduino|DHT11|TFminiS|SimpleUltrasonic|Zephyr|\bIoT\b|embedded systems?|electronics?|electrical|\bsensors?\b|\bhardware\b|Microsoft Planner|TensorFlow/i,
     );
     expect(renderedText).not.toMatch(
-      /salary|compensation|visa|immigration|passport|residence.?permit|medical|mental health|health information|insurance|customer data|customer count|conversion rate|financial projection|proprietary prompt/i,
+      /salary|compensation|visa|immigration|passport|residence.?permit|medical|mental health|health information|insurance|customers?|employees? data|throughput|adoption|revenue|accuracy metrics?|home address|credentials?|private URLs?|legal disputes?|interpersonal disputes?|conversion rate|financial projection|proprietary prompt/i,
     );
     expect(renderedText).not.toMatch(
       /June 2023|December 2023|November 2022|September 2024/i,
@@ -172,7 +179,7 @@ describe("animated chapter contract", () => {
     });
   });
 
-  it("publishes one global motion root and one persistent scene boundary", async () => {
+  it("publishes one motion root, eight local illustrations, and an astronaut-only boundary", async () => {
     const { container } = renderPortfolio();
     const main = screen.getByRole("main");
     await waitFor(() => {
@@ -181,16 +188,27 @@ describe("animated chapter contract", () => {
       }
     });
 
-    const scenes = container.querySelectorAll("[data-scene-chapter]");
+    expect(main).toHaveAttribute("data-portfolio-variant", "cinematic-storybook");
+    expect(main).toHaveAttribute("data-astronaut-presence", "journey");
+
+    const artworks = container.querySelectorAll("[data-chapter-artwork]");
+    expect(artworks).toHaveLength(CHAPTER_IDS.length);
+    for (const id of CHAPTER_IDS) {
+      const artwork = container.querySelector(`#${id} [data-chapter-artwork="${id}"]`);
+      expect(artwork, `Missing local artwork for #${id}`).toBeTruthy();
+      expect(artwork).toHaveAttribute("aria-hidden", "true");
+    }
+
+    const scenes = container.querySelectorAll('[data-scene-subject="astronaut-only"]');
     expect(scenes).toHaveLength(1);
     expect(scenes[0]).toHaveAttribute("data-scene-chapter", "home");
-    expect(scenes[0]).toHaveAttribute("data-diorama", "hero");
-    expect(scenes[0]).toHaveAttribute("data-astronaut-cameo", "true");
+    expect(scenes[0]).toHaveAttribute("data-astronaut-presence", "journey");
+    expect(container.querySelector("[data-diorama]")).not.toBeInTheDocument();
   });
 
   it("keeps animation decorative and semantic content outside the scene", () => {
     const { container } = renderPortfolio();
-    const scene = container.querySelector("[data-scene-chapter]");
+    const scene = container.querySelector('[data-scene-subject="astronaut-only"]');
     const sceneLayer = container.querySelector(".global-scene-layer");
     expect(sceneLayer).toHaveAttribute("aria-hidden", "true");
     expect(sceneLayer).toContainElement(/** @type {HTMLElement} */ (scene));
@@ -204,7 +222,9 @@ describe("animated chapter contract", () => {
 describe("typography, semantics, and accessibility", () => {
   it("self-hosts Montserrat and keeps first-paint metadata aligned", () => {
     const indexHtml = readFileSync("index.html", "utf8");
-    const stylesheet = readFileSync("src/index.css", "utf8");
+    const stylesheet = ["src/index.css", "src/artwork.css", "src/variant.css"]
+      .map((file) => readFileSync(file, "utf8"))
+      .join("\n");
 
     expect(indexHtml).toContain(HEADLINE);
     expect(indexHtml).toContain('content="#101A2E"');
@@ -270,29 +290,15 @@ describe("typography, semantics, and accessibility", () => {
   });
 });
 
-describe("procedural scene geometry", () => {
-  it("deforms one smooth moon surface into crater bowls and rims", () => {
-    const geometry = createCrateredMoonGeometry();
-    const positions = geometry.getAttribute("position");
-    const normals = geometry.getAttribute("normal");
-    let minimumRadius = Number.POSITIVE_INFINITY;
-    let maximumRadius = 0;
-
-    for (let index = 0; index < positions.count; index += 1) {
-      const radius = Math.hypot(
-        positions.getX(index),
-        positions.getY(index),
-        positions.getZ(index),
-      );
-      minimumRadius = Math.min(minimumRadius, radius);
-      maximumRadius = Math.max(maximumRadius, radius);
-    }
-
-    expect(positions.count).toBeGreaterThan(2_000);
-    expect(normals.count).toBe(positions.count);
-    expect(minimumRadius).toBeLessThan(1.16);
-    expect(maximumRadius - minimumRadius).toBeGreaterThan(0.08);
-
-    geometry.dispose();
+describe("astronaut-only scene", () => {
+  it("uses the branch presence rule without procedural chapter geometry", () => {
+    expect(getAstronautCue("journey", "work", 0.5)).toMatchObject({ visible: true, kind: "journey" });
+    expect(getAstronautCue("hero", "work", 0.5)).toMatchObject({ visible: false, kind: "hidden" });
+    expect(getAstronautCue("cameos", "work", 0.9)).toMatchObject({ visible: true, kind: "cameo" });
+    expect(getAstronautCue("cameos", "practice", 0.9)).toMatchObject({ visible: false, kind: "hidden" });
+    expect(existsSync("src/assets/3d/spaceman.glb")).toBe(true);
+    expect(existsSync("src/components/scene/ChapterDioramas.jsx")).toBe(false);
+    expect(existsSync("src/components/scene/ScenePrimitives.jsx")).toBe(false);
+    expect(existsSync("src/components/scene/geometry.js")).toBe(false);
   });
 });

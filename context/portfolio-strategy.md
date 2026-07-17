@@ -1,4 +1,4 @@
-# Animated Chapter Space Playground Strategy
+# 2D-Led Chapter Space Playground Strategy
 
 ## Objective
 
@@ -8,8 +8,8 @@ Position Dhruba Saha as a software engineer who turns complex workflows into dep
 
 The experience should preserve the memorable astronaut, depth, and motion of the original space portfolio while feeling playful, illustrated, personal, and human-authored. Every content section is a visual chapter rather than a static landing-page block.
 
-- Build a responsive 2.5D environment from layered stars, planets, mountains, a crater, and a sun, with a gently interactive astronaut in the hero and short transition cameos.
-- Pair each chapter with a restrained procedural 3D diorama that reflects its story: workflow mechanics, software tools, Kyber's boundary monolith, Tremor Track's moon, career wayfinding, photography, and contact.
+- Build responsive 2D environments from layered stars, planets, mountains, a crater, a sun, and section-owned SVG illustrations. Keep the existing astronaut as the only optional 3D subject.
+- Give every chapter an authored 2D composition reflecting its story: workflow mechanics, software tools, Kyber's boundary monolith, Tremor Track's moon, career wayfinding, photography, and contact.
 - Use dusty midnight `#101A2E`, ink `#0A0D14`, warm cream `#F2E8D5`, burnt orange `#D6683C`, muted sky `#6FA8C8`, and moss `#6E7F55`.
 - Use a self-hosted Montserrat variable font throughout, matching the deployed portfolio typography without remote requests.
 - Prefer varied full-width compositions, underlined text links, tactile illustration, and generous pauses over reusable product cards.
@@ -27,8 +27,8 @@ The experience should preserve the memorable astronaut, depth, and motion of the
 7. About and photography.
 8. Direct contact.
 
-Native scrolling activates these chapters without pinning or hijacking the document. The active section publishes normalized enter, active, exit, and transition progress to CSS custom properties; the single transparent canvas follows the same state. Decorative motion may be expressive, while prose, links, focus targets, and heading positions remain stable.
+Native scrolling activates these chapters without pinning or hijacking the document. The active section publishes normalized enter, active, exit, and transition progress to CSS custom properties; the optional astronaut canvas follows the same state. Decorative motion may be expressive, while prose, links, focus targets, and heading positions remain stable.
 
 ## Release standard
 
-The first screen must communicate Dhruba's name, software-engineering identity, Germany location, and current focus before WebGL loads. Every navigation path remains keyboard accessible. Capable mobile devices receive the same chapters with lower geometry and rendering density, never at the expense of native touch scrolling. Reduced motion, save-data mode, unsupported WebGL, and context loss produce a complete static experience. Asset budgets and live-browser accessibility checks are enforced by `npm run check`.
+The first screen must communicate Dhruba's name, software-engineering identity, Germany location, and current focus before WebGL loads. Every navigation path remains keyboard accessible. Capable mobile devices receive the same 2D chapters with smaller motion amplitudes, never at the expense of native touch scrolling. Reduced motion, save-data mode, unsupported WebGL, and context loss produce a complete static experience. Asset budgets and live-browser accessibility checks are enforced by `npm run check`.

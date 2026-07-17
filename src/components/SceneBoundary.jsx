@@ -1,31 +1,18 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState } from "react";
-import CosmicFallback from "./CosmicFallback";
-import { normalizeChapter } from "./scene/chapterConfig";
 import styles from "./scene/boundary.module.css";
 
-const LazySpacePlaygroundScene = lazy(() => import("./scene/SpacePlaygroundScene"));
+const LazyAstronautScene = lazy(() => import("./scene/SpacePlaygroundScene"));
 
-/** @typedef {'static' | 'interactive' | 'reduced' | 'save-data' | 'unsupported' | 'failed' | 'deferred'} MotionMode */
-/** @typedef {{x?: number, y?: number, impulse?: number}} ScenePointer */
-/**
- * @typedef {{
- *   activeChapter?: string,
- *   previousChapter?: string | null,
- *   progress?: number,
- *   enter?: number,
- *   exit?: number,
- *   transitionProgress?: number,
- *   globalProgress?: number
- * }} ChapterMotionState
- */
+/** @typedef {import('../data/types.js').MotionMode} MotionMode */
+/** @typedef {import('../data/types.js').ChapterMotionState} ChapterMotionState */
+/** @typedef {import('../data/types.js').ArtworkPointer} ArtworkPointer */
+/** @typedef {import('../data/types.js').AstronautPresence} AstronautPresence */
 /** @template T @typedef {{current: T}} MutableRef */
 
 function canUseWebGl2() {
   if (typeof document === "undefined") return false;
-
   try {
-    const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2", { failIfMajorPerformanceCaveat: true }));
+    return Boolean(document.createElement("canvas").getContext("webgl2", { failIfMajorPerformanceCaveat: true }));
   } catch {
     return false;
   }
@@ -35,8 +22,7 @@ function canUseWebGl2() {
 function getSceneMode() {
   if (typeof window === "undefined") return "static";
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "reduced";
-  const connection = /** @type {Navigator & {connection?: {saveData?: boolean}}} */ (navigator)
-    .connection;
+  const connection = /** @type {Navigator & {connection?: {saveData?: boolean}}} */ (navigator).connection;
   if (connection?.saveData) return "save-data";
   return canUseWebGl2() ? "interactive" : "unsupported";
 }
@@ -56,43 +42,29 @@ class SceneErrorBoundary extends Component {
   }
 
   render() {
-    if (this.state.failed) return null;
-    return this.props.children;
+    return this.state.failed ? null : this.props.children;
   }
 }
 
 /**
- * Progressive wrapper for the one decorative, fixed scene. The DOM owns all
- * meaning and controls; this layer receives only chapter motion refs and never
- * intercepts pointer or touch input.
- *
- * Legacy scrollProgress/pointer values remain accepted so a delayed parent
- * integration still degrades to the hero poster instead of breaking.
+ * Lazy progressive boundary for the attributed astronaut. Every chapter's
+ * complete illustration lives in semantic section-adjacent DOM, so the site
+ * never depends on WebGL for meaning or visual continuity.
  *
  * @param {{
  *   activeChapter?: string,
- *   motionRef?: MutableRef<ChapterMotionState>,
- *   pointerRef?: MutableRef<ScenePointer>,
+ *   presence?: AstronautPresence,
+ *   motionRef: MutableRef<ChapterMotionState>,
+ *   pointerRef: MutableRef<ArtworkPointer>,
  *   viewportTier?: 'mobile' | 'tablet' | 'desktop',
- *   visible?: boolean,
- *   scrollProgress?: number,
- *   pointer?: ScenePointer
+ *   visible?: boolean
  * }} props
  */
 export default function SceneBoundary({
   activeChapter = "home",
-  motionRef = {
-    current: {
-      activeChapter: "home",
-      previousChapter: null,
-      progress: 0,
-      enter: 0,
-      exit: 0,
-      transitionProgress: 1,
-      globalProgress: 0,
-    },
-  },
-  pointerRef = { current: { x: 0, y: 0, impulse: 0 } },
+  presence = "journey",
+  motionRef,
+  pointerRef,
   viewportTier = "desktop",
   visible = true,
 }) {
@@ -108,7 +80,6 @@ export default function SceneBoundary({
       setActivated(false);
       setFailed(false);
     };
-
     updateMode();
     media.addEventListener?.("change", updateMode);
     return () => media.removeEventListener?.("change", updateMode);
@@ -116,7 +87,6 @@ export default function SceneBoundary({
 
   useEffect(() => {
     if (mode !== "interactive") return undefined;
-
     const activate = () => setActivated(true);
     window.addEventListener("pointermove", activate, { once: true, passive: true });
     window.addEventListener("pointerdown", activate, { once: true, passive: true });
@@ -124,7 +94,6 @@ export default function SceneBoundary({
     window.addEventListener("wheel", activate, { once: true, passive: true });
     window.addEventListener("scroll", activate, { once: true, passive: true });
     window.addEventListener("keydown", activate, { once: true });
-
     return () => {
       window.removeEventListener("pointermove", activate);
       window.removeEventListener("pointerdown", activate);
@@ -138,71 +107,33 @@ export default function SceneBoundary({
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
-
     const handleContextLoss = () => setFailed(true);
     root.addEventListener("playgroundscenelost", handleContextLoss);
     return () => root.removeEventListener("playgroundscenelost", handleContextLoss);
   }, []);
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
-
-    let frame = 0;
-    let previousValue = "";
-    const syncCameoState = () => {
-      frame = 0;
-      const progress = Math.min(1, Math.max(0, Number(motionRef.current.progress) || 0));
-      const home = normalizeChapter(activeChapter) === "hero";
-      const cameo = home || progress < 0.28 || progress > 0.72;
-      const nextValue = cameo ? "true" : "false";
-      if (nextValue !== previousValue) {
-        root.dataset.astronautCameo = nextValue;
-        previousValue = nextValue;
-      }
-    };
-
-    const scheduleSync = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(syncCameoState);
-    };
-
-    scheduleSync();
-    window.addEventListener("scroll", scheduleSync, { passive: true });
-    window.addEventListener("resize", scheduleSync);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", scheduleSync);
-      window.removeEventListener("resize", scheduleSync);
-    };
-  }, [activeChapter, motionRef]);
-
-  const interactive = mode === "interactive" && activated && !failed;
+  const heroOnlyOutsideHero = presence === "hero" && activeChapter !== "home";
+  const interactive = mode === "interactive" && activated && !failed && !heroOnlyOutsideHero;
   const renderedMode = /** @type {MotionMode} */ (
     failed ? "failed" : mode === "interactive" && !activated ? "deferred" : mode
   );
-  const normalized = normalizeChapter(activeChapter);
-  const initialCameo = normalized === "hero";
 
   return (
     <div
       ref={rootRef}
       className={styles.boundary}
       data-scene-mode={renderedMode}
+      data-scene-subject="astronaut-only"
+      data-astronaut-presence={presence}
       data-scene-chapter={activeChapter}
-      data-diorama={normalized}
-      data-astronaut-cameo={initialCameo ? "true" : "false"}
       aria-hidden="true"
     >
-      <CosmicFallback
-        activeChapter={activeChapter}
-        motionAllowed={interactive}
-      />
       {interactive ? (
         <SceneErrorBoundary onFailure={() => setFailed(true)}>
           <Suspense fallback={null}>
-            <LazySpacePlaygroundScene
+            <LazyAstronautScene
               activeChapter={activeChapter}
+              presence={presence}
               motionRef={motionRef}
               pointerRef={pointerRef}
               viewportTier={viewportTier}

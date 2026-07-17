@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 
 import App from "./App";
 import "./index.css";
+import "./artwork.css";
+import "./variant.css";
 
 const root = document.getElementById("root");
 

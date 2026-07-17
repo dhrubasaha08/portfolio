@@ -21,16 +21,8 @@ const CHAPTER_IDS = [
   "about",
   "contact",
 ];
-const DIORAMA_BY_CHAPTER = {
-  home: "hero",
-  work: "impact",
-  practice: "practice",
-  "project-kyber": "kyber",
-  "tremor-track": "tremor",
-  experience: "experience",
-  about: "about",
-  contact: "contact",
-};
+const VARIANT_ID = "cinematic-storybook";
+const ASTRONAUT_PRESENCE = "journey";
 const CHAPTER_MOTION_PROPERTIES = [
   "--chapter-progress",
   "--chapter-enter",
@@ -70,9 +62,17 @@ test("renders the approved narrative, metric, project order, and evidence", asyn
 
   await expect(page.getByRole("heading", { level: 1, name: HEADLINE })).toBeVisible();
   await expect(page.getByText(HERO_SUMMARY, { exact: true })).toBeVisible();
-  await expect(page.getByText(/Software Engineer · Applied AI & Automation/i)).toBeVisible();
+  const currentRole = page.locator('[data-experience-id="current-role"]');
+  await expect(currentRole).toContainText(
+    "Software Engineer · Applied AI & Automation · Current",
+  );
+  await expect(currentRole).toContainText("Germany");
   await expect(page.getByText("≈ 8 hours")).toBeVisible();
   await expect(page.getByText("≈ 5 minutes")).toBeVisible();
+  await expect(page.locator(".impact-result")).toHaveAttribute(
+    "aria-label",
+    "Approximately eight hours reduced to approximately five minutes",
+  );
   await expect(page.getByText(/Expert review remains/i)).toBeVisible();
   await expect(page.getByText("Private active R&D")).toBeVisible();
   await expect(page.getByText("Earlier team hackathon project")).toBeVisible();
@@ -172,16 +172,25 @@ test("publishes a normalized contract for all eight animated chapters", async ({
   }
 });
 
-test("uses one persistent canvas whose diorama follows native chapter scrolling", async ({
+test("uses eight local 2D chapters and one astronaut-only progressive canvas", async ({
   page,
 }) => {
   await page.goto("/");
-  const scene = page.locator("[data-scene-chapter]");
+  const scene = page.locator('[data-scene-subject="astronaut-only"]');
+  const main = page.locator("main");
   await expect(scene).toHaveCount(1);
+  await expect(main).toHaveAttribute("data-portfolio-variant", VARIANT_ID);
+  await expect(main).toHaveAttribute("data-astronaut-presence", ASTRONAUT_PRESENCE);
   await expect(page.locator(".global-scene-layer")).toHaveAttribute("aria-hidden", "true");
   await expect(scene).toHaveAttribute("data-scene-chapter", "home");
-  await expect(scene).toHaveAttribute("data-diorama", /\S+/);
-  await expect(scene).toHaveAttribute("data-astronaut-cameo", /\S+/);
+  await expect(scene).toHaveAttribute("data-astronaut-presence", ASTRONAUT_PRESENCE);
+  await expect(page.locator("[data-diorama]")).toHaveCount(0);
+
+  for (const id of CHAPTER_IDS) {
+    const artwork = page.locator(`#${id} [data-chapter-artwork="${id}"]`);
+    await expect(artwork).toHaveCount(1);
+    await expect(artwork).toHaveAttribute("aria-hidden", "true");
+  }
 
   await expect(scene).toHaveAttribute(
     "data-scene-mode",
@@ -201,22 +210,17 @@ test("uses one persistent canvas whose diorama follows native chapter scrolling"
     await expect(scene).toHaveAttribute("data-scene-chapter", id);
     await expect.poll(() => readMotionValue(page, `#${id}`, "--chapter-progress"))
       .not.toBe(before);
-    await expect(scene).toHaveAttribute("data-diorama", DIORAMA_BY_CHAPTER[id]);
   }
 
   await centerChapter(page, "work");
   await expect(scene).toHaveAttribute("data-scene-chapter", "work");
-  await expect(scene).toHaveAttribute("data-astronaut-cameo", "false");
-
-  await centerChapter(page, "home");
-  await expect(scene).toHaveAttribute("data-astronaut-cameo", "true");
   await expect(page.locator("canvas")).toHaveCount(initialMode === "unsupported" ? 0 : 1);
 });
 
 test("updates pointer motion gently without making the canvas interactive", async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1440 });
   await page.goto("/");
-  const scene = page.locator("[data-scene-chapter]");
+  const scene = page.locator('[data-scene-subject="astronaut-only"]');
   await expect(scene).toHaveCount(1);
   const pointerBefore = await readMotionValue(page, "main", "--pointer-x");
   await page.mouse.move(1296, 180);
@@ -229,6 +233,21 @@ test("updates pointer motion gently without making the canvas interactive", asyn
     await expect(page.locator("canvas")).toHaveCSS("pointer-events", "none");
     await expect(page.locator("canvas")).toHaveCSS("touch-action", "pan-y");
   }
+});
+
+test("moves only decorative artwork while semantic content stays stationary", async ({ page }) => {
+  await page.setViewportSize({ height: 900, width: 1440 });
+  await page.goto("/");
+  const paper = page.locator("#work .art-paper-one");
+  const before = await paper.evaluate((element) => getComputedStyle(element).transform);
+  await centerChapter(page, "work");
+  await expect.poll(() => paper.evaluate((element) => getComputedStyle(element).transform))
+    .not.toBe(before);
+  await expect(page.locator("#work .impact-before")).toHaveCSS("transform", "none");
+  const semanticTransforms = await page.locator(
+    "#practice .practice-statements article, #experience .experience-list article",
+  ).evaluateAll((elements) => elements.map((element) => getComputedStyle(element).transform));
+  expect(semanticTransforms.every((value) => value === "none")).toBe(true);
 });
 
 test("mobile tap impulses do not capture touch scrolling", async ({ browser }) => {
@@ -305,13 +324,13 @@ test("keeps navigation, focus, landmarks, headings, and axe results accessible",
 
 test("has no retired career, confidential, or unapproved link copy", async ({ page }) => {
   await page.goto("/");
-  const renderedText = await page.locator("body").innerText();
-  const renderedMarkup = await page.locator("body").innerHTML();
+  const renderedText = await page.locator("html").innerText();
+  const renderedMarkup = await page.locator("html").innerHTML();
   expect(renderedText).not.toMatch(
     /Arduino|DHT11|TFminiS|SimpleUltrasonic|Zephyr|\bIoT\b|embedded systems?|electronics?|electrical|\bsensors?\b|\bhardware\b|Microsoft Planner|TensorFlow/i,
   );
   expect(renderedText).not.toMatch(
-    /salary|compensation|visa|immigration|passport|residence.?permit|medical|mental health|health information|insurance|customer data|customer count|conversion rate|financial projection|proprietary prompt/i,
+    /salary|compensation|visa|immigration|passport|residence.?permit|medical|mental health|health information|insurance|customers?|employees? data|throughput|adoption|revenue|accuracy metrics?|home address|credentials?|private URLs?|legal disputes?|interpersonal disputes?|conversion rate|financial projection|proprietary prompt/i,
   );
   expect(renderedMarkup).not.toMatch(/getform\.io|dropbox\.com|linkedin\.com/i);
 });
@@ -341,7 +360,7 @@ for (const viewport of VIEWPORTS) {
 
     for (const id of CHAPTER_IDS) {
       await centerChapter(page, id);
-      await expect(page.locator("[data-scene-chapter]")).toHaveAttribute(
+      await expect(page.locator('[data-scene-subject="astronaut-only"]')).toHaveAttribute(
         "data-scene-chapter",
         id,
       );
@@ -374,12 +393,10 @@ test.describe("progressive scene fallbacks", () => {
       "data-scene-mode",
       "reduced",
     );
-    await expect(page.locator('[data-testid="cosmic-fallback"]')).toHaveAttribute(
-      "data-motion",
-      "static",
-    );
     await expect(page.locator("canvas")).toHaveCount(0);
-    for (const id of CHAPTER_IDS) await expect(page.locator(`#${id}`)).toBeAttached();
+    for (const id of CHAPTER_IDS) {
+      await expect(page.locator(`#${id} [data-chapter-artwork="${id}"]`)).toBeVisible();
+    }
     await context.close();
   });
 
@@ -395,8 +412,8 @@ test.describe("progressive scene fallbacks", () => {
       "data-scene-mode",
       "save-data",
     );
-    await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator("[data-chapter-artwork]")).toHaveCount(CHAPTER_IDS.length);
   });
 
   test("keeps content available without WebGL", async ({ page }) => {
@@ -412,7 +429,7 @@ test.describe("progressive scene fallbacks", () => {
       "unsupported",
     );
     await expect(page.getByRole("heading", { level: 1, name: HEADLINE })).toBeVisible();
-    await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
+    await expect(page.locator("[data-chapter-artwork]")).toHaveCount(CHAPTER_IDS.length);
   });
 
   test("returns to the static scene after a reported context loss", async ({ page }) => {
@@ -420,8 +437,8 @@ test.describe("progressive scene fallbacks", () => {
     const scene = page.locator("[data-scene-mode]");
     await scene.dispatchEvent("playgroundscenelost");
     await expect(scene).toHaveAttribute("data-scene-mode", "failed");
-    await expect(page.locator('[data-testid="cosmic-fallback"]')).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator("[data-chapter-artwork]")).toHaveCount(CHAPTER_IDS.length);
     await expect(page.getByRole("main")).toBeVisible();
   });
 });

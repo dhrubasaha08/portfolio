@@ -1,22 +1,11 @@
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { PlaygroundWorld, RenderDriver } from "./PlaygroundWorld";
-import { normalizeChapter } from "./chapterConfig";
 import styles from "./scene.module.css";
 
-/** @typedef {{x?: number, y?: number, impulse?: number}} ScenePointer */
-
-/**
- * @typedef {{
- *   activeChapter?: string,
- *   previousChapter?: string | null,
- *   progress?: number,
- *   enter?: number,
- *   exit?: number,
- *   transitionProgress?: number,
- *   globalProgress?: number
- * }} ChapterMotionState
- */
+/** @typedef {import('../../data/types.js').ArtworkPointer} ArtworkPointer */
+/** @typedef {import('../../data/types.js').AstronautPresence} AstronautPresence */
+/** @typedef {import('../../data/types.js').ChapterMotionState} ChapterMotionState */
 
 /**
  * @template T
@@ -29,14 +18,16 @@ import styles from "./scene.module.css";
  *
  * @param {{
  *   activeChapter?: string,
+ *   presence?: AstronautPresence,
  *   motionRef: MutableRef<ChapterMotionState>,
- *   pointerRef: MutableRef<ScenePointer>,
+ *   pointerRef: MutableRef<ArtworkPointer>,
  *   viewportTier?: 'mobile' | 'tablet' | 'desktop',
  *   visible?: boolean
  * }} props
  */
 export function SpacePlaygroundScene({
   activeChapter = "home",
+  presence = "journey",
   motionRef,
   pointerRef,
   viewportTier = "desktop",
@@ -71,7 +62,7 @@ export function SpacePlaygroundScene({
       className={`${styles.scene} ${ready ? styles.ready : ""}`}
       aria-hidden="true"
       data-renderer="webgl"
-      data-diorama={normalizeChapter(activeChapter)}
+      data-scene-subject="astronaut-only"
     >
       <Canvas
         className={styles.canvas}
@@ -107,6 +98,7 @@ export function SpacePlaygroundScene({
         />
         <PlaygroundWorld
           activeChapter={activeChapter}
+          presence={presence}
           motionRef={motionRef}
           pointerRef={pointerRef}
           viewportTier={viewportTier}
