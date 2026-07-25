@@ -28,6 +28,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  * @property {number} enterProgress
  * @property {number} exitProgress
  * @property {number} globalProgress
+ * @property {Record<string, {progress: number, enter: number, exit: number}>} chapters
  * @property {MotionMode} motionMode
  */
 
@@ -87,6 +88,7 @@ export function useSpaceJourney(sectionIds) {
       enterProgress: 0,
       exitProgress: 0,
       globalProgress: 0,
+      chapters: {},
       motionMode: readMotionMode(),
     }),
   );
@@ -133,7 +135,7 @@ export function useSpaceJourney(sectionIds) {
     for (const reading of readings) {
       if (current === null || reading.distance < current.distance) current = reading;
     }
-    const motionMode = readMotionMode();
+    const motionMode = motionRef.current.motionMode;
     const globalProgress = clamp(window.scrollY / scrollableHeight, 0, 1);
     const effectiveGlobalProgress =
       motionMode === "interactive" ? globalProgress : 0;
@@ -141,6 +143,38 @@ export function useSpaceJourney(sectionIds) {
 
     motion.globalProgress = effectiveGlobalProgress;
     motion.motionMode = motionMode;
+
+    for (const reading of readings) {
+      const chapterProgress = motionMode === "interactive" ? reading.progress : 0.5;
+      const chapterEnter = motionMode === "interactive" ? reading.enter : 1;
+      const chapterExit = motionMode === "interactive" ? reading.exit : 0;
+      const presence =
+        motionMode === "interactive"
+          ? clamp(1 - reading.distance / (viewportHeight * 1.35), 0, 1)
+          : 1;
+      const centered = chapterProgress - 0.5;
+
+      motion.chapters[reading.id] = {
+        progress: chapterProgress,
+        enter: chapterEnter,
+        exit: chapterExit,
+      };
+      reading.node.style.setProperty("--chapter-progress", cssNumber(chapterProgress));
+      reading.node.style.setProperty("--chapter-enter", cssNumber(chapterEnter));
+      reading.node.style.setProperty("--chapter-exit", cssNumber(chapterExit));
+      reading.node.style.setProperty("--chapter-presence", cssNumber(presence));
+      reading.node.style.setProperty("--art-x-small", `${(centered * 48).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-x-medium", `${(centered * 112).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-x-large", `${(centered * 220).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-y-small", `${(centered * -44).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-y-medium", `${(centered * -108).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-y-large", `${(centered * -190).toFixed(2)}px`);
+      reading.node.style.setProperty("--art-turn", `${(centered * 18).toFixed(2)}deg`);
+      reading.node.style.setProperty("--art-turn-soft", `${(centered * 7).toFixed(2)}deg`);
+      reading.node.style.setProperty("--art-dash", cssNumber(1 - chapterProgress));
+      reading.node.style.setProperty("--art-reveal", `${(chapterProgress * 100).toFixed(2)}%`);
+      reading.node.toggleAttribute("data-motion-near", reading.distance < viewportHeight * 1.8);
+    }
 
     if (current) {
       if (motion.activeSection !== current.id) {
@@ -199,6 +233,10 @@ export function useSpaceJourney(sectionIds) {
       /** @type {Navigator & {connection?: EventTarget & {saveData?: boolean}}} */ (navigator)
         .connection;
     let pointerListenersAttached = false;
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => scheduleMeasure());
 
     const handleVisibility = () => {
       const nextVisible = document.visibilityState !== "hidden";
@@ -249,9 +287,16 @@ export function useSpaceJourney(sectionIds) {
 
     window.addEventListener("scroll", scheduleMeasure, { passive: true });
     window.addEventListener("resize", scheduleMeasure);
+    window.addEventListener("load", scheduleMeasure);
     document.addEventListener("visibilitychange", handleVisibility);
     reducedMotion.addEventListener?.("change", handleMotionPreference);
     connection?.addEventListener?.("change", handleMotionPreference);
+    if (rootRef.current) resizeObserver?.observe(rootRef.current);
+    for (const id of stableIds) {
+      const node = document.getElementById(id);
+      if (node) resizeObserver?.observe(node);
+    }
+    void document.fonts?.ready.then(scheduleMeasure);
 
     rootRef.current?.style.setProperty("--space-pointer-x", "0");
     rootRef.current?.style.setProperty("--space-pointer-y", "0");
@@ -267,10 +312,12 @@ export function useSpaceJourney(sectionIds) {
       pointerFrameRef.current = null;
       window.removeEventListener("scroll", scheduleMeasure);
       window.removeEventListener("resize", scheduleMeasure);
+      window.removeEventListener("load", scheduleMeasure);
       syncPointerListeners(false);
       document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener?.("change", handleMotionPreference);
       connection?.removeEventListener?.("change", handleMotionPreference);
+      resizeObserver?.disconnect();
     };
   }, [scheduleMeasure, schedulePointer, stableIds]);
 

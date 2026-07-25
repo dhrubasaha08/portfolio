@@ -9,7 +9,7 @@ const approvedEvidence = [
   "https://www.spaceappschallenge.org/2023/find-a-team/tremor-track/?tab=project",
 ];
 
-describe("content-rich space portfolio", () => {
+describe("animated 2D space portfolio", () => {
   it("leads with the approved current-career identity", () => {
     render(<App />);
 
@@ -42,22 +42,37 @@ describe("content-rich space portfolio", () => {
     }
   });
 
-  it("keeps the approved project order, metric, and evidence", () => {
+  it("keeps the expanded story, approved project order, metric, and evidence", () => {
     const { container } = render(<App />);
 
+    const role = container.querySelector("#role");
+    const buildNow = container.querySelector("#what-i-build");
     const workflow = container.querySelector("#workflow");
+    const method = container.querySelector("#how-i-work");
     const kyber = container.querySelector("#project-kyber");
     const tremor = container.querySelector("#tremor-track");
     if (
+      !(role instanceof HTMLElement) ||
+      !(buildNow instanceof HTMLElement) ||
       !(workflow instanceof HTMLElement) ||
+      !(method instanceof HTMLElement) ||
       !(kyber instanceof HTMLElement) ||
       !(tremor instanceof HTMLElement)
     ) {
-      throw new Error("Expected workflow, Kyber, and Tremor Track sections.");
+      throw new Error("Expected role, focus, workflow, method, and project sections.");
     }
 
     expect(
-      workflow.compareDocumentPosition(kyber) & Node.DOCUMENT_POSITION_FOLLOWING,
+      role.compareDocumentPosition(buildNow) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      buildNow.compareDocumentPosition(workflow) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      workflow.compareDocumentPosition(method) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      method.compareDocumentPosition(kyber) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
       kyber.compareDocumentPosition(tremor) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -70,6 +85,8 @@ describe("content-rich space portfolio", () => {
     );
     expect(document.body).toHaveTextContent("Private active R&D");
     expect(document.body).toHaveTextContent("Earlier team hackathon project");
+    expect(within(buildNow).getAllByRole("listitem")).toHaveLength(4);
+    expect(within(method).getAllByRole("listitem")).toHaveLength(5);
 
     for (const href of approvedEvidence) {
       const link = container.querySelector(`a[href="${href}"]`);
@@ -93,7 +110,7 @@ describe("content-rich space portfolio", () => {
     expect(text).not.toMatch(/résumé|resume|LinkedIn|internship|bachelor/i);
   });
 
-  it("keeps the canvas decorative and the semantic document complete without WebGL", () => {
+  it("gives every chapter authored decorative artwork and keeps content outside it", () => {
     const { container } = render(<App />);
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
@@ -104,7 +121,20 @@ describe("content-rich space portfolio", () => {
       "href",
       "#main-content",
     );
-    expect(container.querySelectorAll("[data-testid='space-artwork']")).toHaveLength(1);
+    const chapters = container.querySelectorAll("[data-journey-section]");
+    const artworks = container.querySelectorAll("[data-chapter-artwork]");
+    expect(chapters).toHaveLength(9);
+    expect(artworks).toHaveLength(9);
+    for (const chapter of chapters) {
+      const artwork = chapter.querySelector(":scope > [data-chapter-artwork]");
+      const content = chapter.querySelector(":scope > [data-content-layer]");
+      expect(artwork).toHaveAttribute("aria-hidden", "true");
+      expect(content).toBeTruthy();
+      expect(artwork?.contains(content)).toBe(false);
+      for (const svg of artwork?.querySelectorAll("svg") ?? []) {
+        expect(svg).toHaveAttribute("focusable", "false");
+      }
+    }
     expect(container.querySelectorAll(".astronaut-scene")).toHaveLength(1);
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
   });

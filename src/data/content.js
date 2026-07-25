@@ -2,10 +2,12 @@
 /** @typedef {import("./types.js").AstronautCredit} AstronautCredit */
 /** @typedef {import("./types.js").ContactLink} ContactLink */
 /** @typedef {import("./types.js").CurrentRole} CurrentRole */
+/** @typedef {import("./types.js").DeliveryPhase} DeliveryPhase */
 /** @typedef {import("./types.js").NavItem} NavItem */
 /** @typedef {import("./types.js").PublicProject} PublicProject */
 /** @typedef {import("./types.js").ResearchProject} ResearchProject */
 /** @typedef {import("./types.js").WorkflowCaseStudy} WorkflowCaseStudy */
+/** @typedef {import("./types.js").Workstream} Workstream */
 
 export const identity = {
   name: "Dhruba Saha",
@@ -32,7 +34,9 @@ export const hero = {
 export const navItems = [
   { label: "Home", href: "#hero" },
   { label: "Role", href: "#role" },
+  { label: "Focus", href: "#what-i-build" },
   { label: "Workflow", href: "#workflow" },
+  { label: "Method", href: "#how-i-work" },
   { label: "Projects", href: "#project-kyber" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
@@ -44,11 +48,11 @@ export const currentRole = {
   label: "Software Engineer · Applied AI & Automation · Current",
   location: "Germany",
   summary:
-    "I take substantial ownership of internal software from an initially unclear operational need through architecture, implementation, validation, documentation, and maintenance. The work spans backend services, APIs, data flows, integrations, and operational tooling built to stay understandable after the first release.",
+    "I work across the full delivery path: requirements discovery, architecture, implementation, validation, documentation, and maintenance. That means understanding the real process before defining a technical boundary, then building and supporting the software that carries it.",
   responsibilities: [
-    "Discover requirements with the people closest to the work and translate them into a tractable software boundary.",
-    "Design and implement backend services, APIs, data flows, integrations, and operational tooling.",
-    "Validate outcomes with domain experts, document decisions, and maintain systems as needs change.",
+    "Turn an unclear operational need into explicit responsibilities, interfaces, and data flows.",
+    "Build backend services, APIs, workflow automation, integrations, and internal tools.",
+    "Review outcomes with the people closest to the work, document decisions, and keep the implementation understandable as requirements change.",
   ],
   stack: [
     "Python",
@@ -64,15 +68,43 @@ export const currentRole = {
   ],
 };
 
+/** @type {readonly Workstream[]} */
+export const workstreams = [
+  {
+    id: "backend",
+    title: "Backend systems and APIs",
+    description:
+      "Services that give an operational process a clear software boundary and predictable interfaces.",
+  },
+  {
+    id: "automation",
+    title: "Workflow automation",
+    description:
+      "Software that coordinates data, services, and handoffs while keeping the result visible to the people responsible for it.",
+  },
+  {
+    id: "internal-tools",
+    title: "Internal tools",
+    description:
+      "Operational interfaces built around how people actually work, with documentation and maintenance considered from the beginning.",
+  },
+  {
+    id: "applied-ai",
+    title: "Applied AI",
+    description:
+      "Retrieval, context selection, structured outputs, and orchestration used where they genuinely improve a workflow—with an explicit validation boundary.",
+  },
+];
+
 /** @type {WorkflowCaseStudy} */
 export const workflowCaseStudy = {
   id: "workflow",
   title: "AI-assisted workflow automation",
   status: "Sanitized internal case study",
   problem:
-    "A recurring operational workflow required people to gather source material, identify relevant context, produce a consistent draft, and prepare it for expert review. The complete manual process took approximately eight hours.",
+    "The work began as a recurring manual sequence: gather approved source material, identify the relevant context, prepare a consistent draft, and hand it to an expert for review. End to end, the process took approximately eight hours.",
   contribution:
-    "I designed and implemented a workflow that selects relevant context, produces structured output, coordinates supporting services, and presents the result for expert validation.",
+    "I mapped that sequence into a software workflow and designed the path from source material through retrieval, structured output, orchestration, and validation. The final decision remains outside the automation.",
   metric: {
     before: "≈8 hours",
     after: "≈5 minutes",
@@ -117,6 +149,8 @@ export const workflowCaseStudy = {
         "An expert decides whether the result is ready to use.",
     },
   ],
+  rationale:
+    "Retrieval selects relevant context. Structured output creates a predictable shape. Orchestration moves the result through the required services. Validation makes the handoff to an expert explicit.",
   outcome:
     "Reduced approximately eight hours of work to approximately five minutes while retaining expert review.",
   reviewBoundary:
@@ -125,6 +159,40 @@ export const workflowCaseStudy = {
     "The employer, source material, prompts, private data, screenshots, and proprietary implementation remain confidential.",
 };
 
+/** @type {readonly DeliveryPhase[]} */
+export const deliveryPhases = [
+  {
+    id: "discover",
+    title: "Discover",
+    description:
+      "Understand the operational need, the people closest to it, and how information currently moves.",
+  },
+  {
+    id: "define",
+    title: "Define",
+    description:
+      "Establish the software boundary, interfaces, data flows, and decisions that remain with people.",
+  },
+  {
+    id: "build",
+    title: "Build",
+    description:
+      "Implement the backend services, APIs, integrations, automation, and operational tooling.",
+  },
+  {
+    id: "validate",
+    title: "Validate",
+    description:
+      "Review outcomes with the people using the system and document the important decisions.",
+  },
+  {
+    id: "maintain",
+    title: "Maintain",
+    description:
+      "Keep the system understandable as requirements and surrounding processes change.",
+  },
+];
+
 /** @type {ResearchProject} */
 export const researchProject = {
   id: "project-kyber",
@@ -132,7 +200,7 @@ export const researchProject = {
   status: "Private active R&D",
   visibility: "private",
   thesis:
-    "A local-first AI coding control-plane research direction focused on context quality, architectural boundaries, controlled execution, and cost-aware model routing.",
+    "Project Kyber is my private research direction for a local-first AI coding control plane. The thesis is that context quality, architectural boundaries, controlled execution, and cost-aware model routing should be treated as one connected system.",
   boundary:
     "This is active private research, not a finished or deployed product, and it has no public link.",
   evidence: [],
@@ -145,7 +213,7 @@ export const tremorTrack = {
   status: "Earlier team hackathon project",
   visibility: "public",
   summary:
-    "A team project created for NASA International Space Apps Challenge 2023, presenting historical lunar seismic activity through an interactive experience.",
+    "Created collaboratively for NASA International Space Apps Challenge 2023, Tremor Track presents historical lunar seismic activity through an interactive experience.",
   contribution:
     "Created collaboratively during the hackathon; this portfolio keeps the contribution wording at team level.",
   outcome:
@@ -179,7 +247,7 @@ export const projects = [researchProject, tremorTrack];
 export const about = {
   title: "Make the complicated understandable.",
   body:
-    "I care about the parts of software that make it dependable after the demo: clear boundaries, maintainable interfaces, useful documentation, and room for the people using it to stay in control.",
+    "I am most useful when an operational need spans several systems and the right boundary is not obvious yet. I care about making that situation understandable, then leaving behind clear interfaces, useful documentation, and software that remains maintainable.",
   photography: {
     title: "Photography",
     body:

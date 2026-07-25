@@ -1,15 +1,27 @@
 import { useMemo } from "react";
 import AstronautScene from "./components/AstronautScene";
-import SpaceArtwork from "./components/SpaceArtwork";
+import {
+  AboutArtwork,
+  BuildArtwork,
+  ContactArtwork,
+  HeroArtwork,
+  KyberArtwork,
+  MethodArtwork,
+  RoleArtwork,
+  TremorArtwork,
+  WorkflowArtwork,
+} from "./components/artwork/ChapterArtwork";
 import {
   about,
   astronautCredit,
   contactLinks,
   currentRole,
+  deliveryPhases,
   hero,
   navItems,
   researchProject,
   tremorTrack,
+  workstreams,
   workflowCaseStudy,
 } from "./data/content";
 import { useSpaceJourney } from "./hooks/useSpaceJourney";
@@ -17,7 +29,9 @@ import { useSpaceJourney } from "./hooks/useSpaceJourney";
 const sectionIds = [
   "hero",
   currentRole.id,
+  "what-i-build",
   workflowCaseStudy.id,
+  "how-i-work",
   researchProject.id,
   tremorTrack.id,
   "about",
@@ -38,7 +52,12 @@ function idFromHref(href) {
 function isActiveDestination(href, activeSection) {
   const destination = idFromHref(href);
   if (destination === activeSection) return true;
-  if (destination === currentRole.id && activeSection === workflowCaseStudy.id) return true;
+  if (
+    destination === currentRole.id &&
+    ["what-i-build", workflowCaseStudy.id, "how-i-work"].includes(activeSection)
+  ) {
+    return true;
+  }
   if (destination === researchProject.id && activeSection === tremorTrack.id) return true;
   return false;
 }
@@ -78,8 +97,6 @@ function App() {
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-
-      <SpaceArtwork activeSection={activeSection} />
 
       <div className="astronaut-layer" aria-hidden="true">
         <AstronautScene
@@ -136,7 +153,8 @@ function App() {
         data-active-section={activeSection}
       >
         <section id="hero" className="chapter hero" data-journey-section="hero">
-          <div className="chapter-inner hero-content">
+          <HeroArtwork />
+          <div className="chapter-inner hero-content" data-content-layer>
             <p className="hero-meta">{hero.identityLine}</p>
             <h1 className="hero-title">{hero.title}</h1>
             <p className="hero-intro">{hero.introduction}</p>
@@ -160,10 +178,11 @@ function App() {
           data-journey-section={currentRole.id}
           data-current-role
         >
-          <div className="chapter-inner current-layout">
+          <RoleArtwork />
+          <div className="chapter-inner current-layout" data-content-layer>
             <div>
               <p className="section-kicker">Current role</p>
-              <h2 className="chapter-title">Software that has to work after the demo.</h2>
+              <h2 className="chapter-title">From unclear operations to working software.</h2>
               <p className="role-label">
                 {currentRole.label}
                 <br />
@@ -186,11 +205,38 @@ function App() {
         </section>
 
         <section
+          id="what-i-build"
+          className="chapter build-now"
+          data-journey-section="what-i-build"
+        >
+          <BuildArtwork />
+          <div className="chapter-inner" data-content-layer>
+            <div className="build-heading">
+              <p className="section-kicker">What I build now</p>
+              <h2 className="chapter-title">
+                Four kinds of work, one goal: dependable software.
+              </h2>
+            </div>
+            <ul className="workstream-list">
+              {workstreams.map((workstream) => (
+                <li key={workstream.id} data-workstream={workstream.id}>
+                  <div>
+                    <h3>{workstream.title}</h3>
+                    <p>{workstream.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section
           id={workflowCaseStudy.id}
           className="chapter workflow"
           data-journey-section={workflowCaseStudy.id}
         >
-          <div className="chapter-inner">
+          <WorkflowArtwork />
+          <div className="chapter-inner" data-content-layer>
             <div className="workflow-heading">
               <div>
                 <p className="section-kicker">{workflowCaseStudy.status}</p>
@@ -230,10 +276,7 @@ function App() {
               </div>
               <div className="case-block">
                 <h3>Why it is dependable</h3>
-                <p>
-                  Retrieval narrows the context, structured output makes the result predictable,
-                  and validation keeps a person responsible for the final decision.
-                </p>
+                <p>{workflowCaseStudy.rationale}</p>
               </div>
             </div>
 
@@ -251,12 +294,37 @@ function App() {
         </section>
 
         <section
+          id="how-i-work"
+          className="chapter method"
+          data-journey-section="how-i-work"
+        >
+          <MethodArtwork />
+          <div className="chapter-inner method-layout" data-content-layer>
+            <div className="method-heading">
+              <p className="section-kicker">How I work</p>
+              <h2 className="chapter-title">
+                The work is not finished when the first demo runs.
+              </h2>
+            </div>
+            <ol className="delivery-list">
+              {deliveryPhases.map((phase) => (
+                <li key={phase.id} data-delivery-phase={phase.id}>
+                  <h3>{phase.title}</h3>
+                  <p>{phase.description}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section
           id={researchProject.id}
           className="chapter research"
           data-journey-section={researchProject.id}
           data-project-status={researchProject.status}
         >
-          <div className="chapter-inner">
+          <KyberArtwork />
+          <div className="chapter-inner" data-content-layer>
             <div className="research-copy">
               <p className="section-kicker">Research direction</p>
               <h2 className="chapter-title">{researchProject.title}</h2>
@@ -273,7 +341,8 @@ function App() {
           data-journey-section={tremorTrack.id}
           data-project-status={tremorTrack.status}
         >
-          <div className="chapter-inner project-layout">
+          <TremorArtwork />
+          <div className="chapter-inner project-layout" data-content-layer>
             <figure className="project-media">
               <img
                 src="/images/tremor-track.png"
@@ -302,7 +371,8 @@ function App() {
         </section>
 
         <section id="about" className="chapter about" data-journey-section="about">
-          <div className="chapter-inner about-layout">
+          <AboutArtwork />
+          <div className="chapter-inner about-layout" data-content-layer>
             <div>
               <p className="section-kicker">About</p>
               <h2 className="chapter-title">{about.title}</h2>
@@ -318,7 +388,8 @@ function App() {
         </section>
 
         <section id="contact" className="chapter contact" data-journey-section="contact">
-          <div className="chapter-inner">
+          <ContactArtwork />
+          <div className="chapter-inner" data-content-layer>
             <p className="section-kicker">Contact</p>
             <h2 className="chapter-title">Let’s talk about useful software.</h2>
             <p className="contact-intro">

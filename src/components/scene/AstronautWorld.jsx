@@ -123,7 +123,12 @@ function Astronaut({
     const side = sectionIndex % 2 === 0 ? 1 : -1;
     const transitionLift = Math.sin(sectionProgress * Math.PI);
     const denseSection =
-      activeSection.includes("role") || activeSection.includes("workflow");
+      activeSection.includes("role") ||
+      activeSection.includes("workflow") ||
+      activeSection === "what-i-build" ||
+      activeSection === "how-i-work" ||
+      activeSection === "tremor-track" ||
+      activeSection === "about";
     const baseX = heroSection
       ? mobile
         ? 1.35
@@ -148,9 +153,13 @@ function Astronaut({
       : 0;
     const pointerX = MathUtils.clamp(pointer.x, -1, 1);
     const pointerY = MathUtils.clamp(pointer.y, -1, 1);
-    const targetOpacity = denseSection
-      ? 0.82 + Math.max(1 - motion.enterProgress, motion.exitProgress) * 0.1
-      : activeSection.includes("kyber") ? 0.9 : 1;
+    const targetOpacity = heroSection
+      ? 1
+      : denseSection
+        ? 0.72 + Math.max(1 - motion.enterProgress, motion.exitProgress) * 0.08
+        : activeSection.includes("kyber")
+          ? 0.82
+          : 0.86;
 
     if (animationEnabledRef.current) mixer.update(safeDelta);
 

@@ -26,9 +26,11 @@ Repository and live-project evidence take precedence over summaries. If evidence
 ## Design and engineering rules
 
 - Preserve the recognizable original space journey: layered stars, planets, sun, mountains, crater, an astronaut, oversized identity, and asymmetric editorial composition.
+- Give every semantic chapter its own authored two-dimensional illustration and scroll choreography. Keep the astronaut secondary outside the hero.
 - Lead with the current software role, workflow automation, backend systems, internal tools, and selective applied AI.
 - Do not add product-dashboard styling, repetitive interface panels, numbered controls, telemetry, neural imagery, fabricated machinery, symbolic chapter dioramas, gradient text, or generated-looking UI decoration.
 - Keep all information and navigation in semantic DOM. WebGL and layered artwork are decorative progressive enhancement and never required to navigate or understand the page.
+- Never transform, fade, mask, or reposition semantic headings, paragraphs, evidence links, or focus targets for decorative motion.
 - Drive scene motion from native document scroll and gentle pointer movement. Never capture touch scrolling or create a nested page-scroll container.
 - Respect reduced motion, save-data, unsupported WebGL, context loss, hidden tabs, and offscreen rendering. Fallback content must remain complete.
 - Maintain keyboard navigation, accessible names, visible focus, WCAG AA contrast, and one logical heading hierarchy.

@@ -135,6 +135,7 @@ export default function AstronautScene({
     window.addEventListener("scroll", activate, passiveOnce);
     window.addEventListener("touchstart", activate, passiveOnce);
     window.addEventListener("keydown", activate, { once: true });
+    const idleHandle = window.requestIdleCallback(activate, { timeout: 1_400 });
 
     if (window.scrollY > 16) activate();
 
@@ -143,6 +144,7 @@ export default function AstronautScene({
       window.removeEventListener("scroll", activate);
       window.removeEventListener("touchstart", activate);
       window.removeEventListener("keydown", activate);
+      window.cancelIdleCallback(idleHandle);
     };
   }, [mode, visible]);
 

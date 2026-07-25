@@ -29,13 +29,21 @@
   opacity: 1;
 }
 
-.scene[data-ready="true"][data-active-section*="role"] .canvasMount,
-.scene[data-ready="true"][data-active-section*="workflow"] .canvasMount {
-  opacity: 0.38;
+.scene[data-ready="true"][data-active-section="role"] .canvasMount,
+.scene[data-ready="true"][data-active-section="workflow"] .canvasMount {
+  opacity: 0.05;
 }
 
-.scene[data-ready="true"][data-active-section*="kyber"] .canvasMount {
-  opacity: 0.64;
+.scene[data-ready="true"][data-active-section="what-i-build"] .canvasMount,
+.scene[data-ready="true"][data-active-section="how-i-work"] .canvasMount,
+.scene[data-ready="true"][data-active-section="tremor-track"] .canvasMount,
+.scene[data-ready="true"][data-active-section="about"] .canvasMount {
+  opacity: 0.025;
+}
+
+.scene[data-ready="true"][data-active-section="project-kyber"] .canvasMount,
+.scene[data-ready="true"][data-active-section="contact"] .canvasMount {
+  opacity: 0.08;
 }
 
 .canvasMount canvas {

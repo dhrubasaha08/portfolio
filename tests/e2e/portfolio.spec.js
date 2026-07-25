@@ -9,6 +9,18 @@ const VIEWPORTS = [
   { height: 900, width: 1440 },
 ];
 
+const CHAPTER_IDS = [
+  "hero",
+  "role",
+  "what-i-build",
+  "workflow",
+  "how-i-work",
+  "project-kyber",
+  "tremor-track",
+  "about",
+  "contact",
+];
+
 test("renders the approved identity, work, projects, and evidence", async ({
   page,
 }) => {
@@ -46,6 +58,75 @@ test("renders the approved identity, work, projects, and evidence", async ({
   }
 });
 
+test("gives every chapter authored 2D motion without moving semantic content", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 900, width: 1440 });
+  await page.goto("/");
+
+  await expect(page.locator("[data-journey-section]")).toHaveCount(CHAPTER_IDS.length);
+  await expect(page.locator("[data-chapter-artwork]")).toHaveCount(CHAPTER_IDS.length);
+
+  const readings = await page.evaluate(async (chapterIds) => {
+    const result = [];
+    const maximumScroll =
+      document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+    for (const id of chapterIds) {
+      const section = document.getElementById(id);
+      if (!section) throw new Error(`Missing chapter ${id}`);
+
+      const artwork = section.querySelector(`[data-chapter-artwork="${id}"]`);
+      const content = section.querySelector("[data-content-layer]");
+      if (!(artwork instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+        throw new Error(`Chapter ${id} is missing its artwork or content layer`);
+      }
+
+      const firstTarget = Math.min(
+        maximumScroll,
+        section.offsetTop + section.offsetHeight * 0.12,
+      );
+      const secondTarget = Math.min(
+        maximumScroll,
+        firstTarget + Math.min(320, section.offsetHeight * 0.2),
+      );
+      window.scrollTo({ top: firstTarget, behavior: "instant" });
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
+      const before = Number.parseFloat(
+        section.style.getPropertyValue("--chapter-progress"),
+      );
+      window.scrollTo({ top: secondTarget, behavior: "instant" });
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
+      const after = Number.parseFloat(
+        section.style.getPropertyValue("--chapter-progress"),
+      );
+
+      result.push({
+        after,
+        artworkHidden: artwork.getAttribute("aria-hidden"),
+        before,
+        contentTransform: getComputedStyle(content).transform,
+        id,
+        pointerEvents: getComputedStyle(artwork).pointerEvents,
+      });
+    }
+
+    return result;
+  }, CHAPTER_IDS);
+
+  expect(readings.map((reading) => reading.id)).toEqual(CHAPTER_IDS);
+  for (const reading of readings) {
+    expect(reading.artworkHidden).toBe("true");
+    expect(reading.pointerEvents).toBe("none");
+    expect(reading.contentTransform).toBe("none");
+    expect(reading.after).toBeGreaterThan(reading.before);
+  }
+});
+
 test("provides semantic landmarks, focusable navigation, and clean axe results", async ({
   page,
 }) => {
@@ -76,7 +157,10 @@ test("makes no remote font, avatar, media, or scenery requests", async ({ page }
   const remoteRequests = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.hostname !== "127.0.0.1") {
+    if (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.hostname !== "127.0.0.1"
+    ) {
       remoteRequests.push(request.url());
     }
   });
@@ -224,10 +308,28 @@ for (const viewport of VIEWPORTS) {
 
     const layout = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
+      clippedContent: Array.from(
+        document.querySelectorAll(
+          "[data-content-layer] h1, [data-content-layer] h2, [data-content-layer] h3, [data-content-layer] p, [data-content-layer] li, [data-content-layer] a",
+        ),
+      )
+        .filter((node) => {
+          const rect = node.getBoundingClientRect();
+          const style = getComputedStyle(node);
+          return (
+            rect.width > 0 &&
+            rect.height > 0 &&
+            style.visibility !== "hidden" &&
+            (rect.left < -1 || rect.right > document.documentElement.clientWidth + 1)
+          );
+        })
+        .slice(0, 5)
+        .map((node) => node.textContent?.trim().slice(0, 80)),
       scrollHeight: document.documentElement.scrollHeight,
       scrollWidth: document.documentElement.scrollWidth,
     }));
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
+    expect(layout.clippedContent).toEqual([]);
     expect(layout.scrollHeight).toBeGreaterThan(viewport.height);
 
     await page.evaluate(() => window.scrollTo({ top: 700, behavior: "instant" }));

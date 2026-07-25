@@ -7,9 +7,12 @@ const outputDirectory = join(process.cwd(), "artifacts", "screenshots");
 const chapters = [
   "hero",
   "role",
+  "what-i-build",
   "workflow",
+  "how-i-work",
   "project-kyber",
   "tremor-track",
+  "about",
   "contact",
 ];
 const viewports = [

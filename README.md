@@ -1,9 +1,10 @@
 # Dhruba Saha — Portfolio
 
 A content-rich personal portfolio built with React and Vite. The interface
-preserves the original layered space artwork and animated astronaut while
-focusing the public narrative on backend systems, automation, internal tools,
-and selective applied AI.
+preserves the original layered space artwork and animated astronaut, then
+extends the journey with an authored, scroll-driven 2D illustration in every
+chapter. The public narrative focuses on backend systems, automation, internal
+tools, and selective applied AI.
 
 ## Local preview
 

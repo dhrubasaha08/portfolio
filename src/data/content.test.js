@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   contactLinks,
   currentRole,
+  deliveryPhases,
   hero,
   identity,
   projects,
   researchProject,
   tremorTrack,
+  workstreams,
   workflowCaseStudy,
 } from "./content.js";
 
@@ -53,6 +55,25 @@ describe("approved public-content contract", () => {
     ]);
   });
 
+  it("keeps the current workstreams and delivery method in approved order", () => {
+    expect(workstreams.map((item) => item.id)).toEqual([
+      "backend",
+      "automation",
+      "internal-tools",
+      "applied-ai",
+    ]);
+    expect(deliveryPhases.map((item) => item.id)).toEqual([
+      "discover",
+      "define",
+      "build",
+      "validate",
+      "maintain",
+    ]);
+    expect(workflowCaseStudy.rationale).toMatch(
+      /Retrieval selects relevant context.*Structured output.*Orchestration.*Validation/s,
+    );
+  });
+
   it("exposes only the approved direct contact links", () => {
     expect(contactLinks.map((link) => link.href)).toEqual([
       "mailto:contact@dhrubasaha.co.in",
@@ -67,6 +88,8 @@ describe("approved public-content contract", () => {
       hero,
       identity,
       projects,
+      deliveryPhases,
+      workstreams,
       workflowCaseStudy,
     });
 

@@ -23,6 +23,20 @@
  */
 
 /**
+ * @typedef {Object} Workstream
+ * @property {"backend" | "automation" | "internal-tools" | "applied-ai"} id
+ * @property {string} title
+ * @property {string} description
+ */
+
+/**
+ * @typedef {Object} DeliveryPhase
+ * @property {"discover" | "define" | "build" | "validate" | "maintain"} id
+ * @property {string} title
+ * @property {string} description
+ */
+
+/**
  * @typedef {Object} WorkflowStep
  * @property {string} id
  * @property {string} label
@@ -45,6 +59,7 @@
  * @property {string} contribution
  * @property {WorkflowMetric} metric
  * @property {readonly WorkflowStep[]} architecture
+ * @property {string} rationale
  * @property {string} outcome
  * @property {string} reviewBoundary
  * @property {string} confidentialityNote
