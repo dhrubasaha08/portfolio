@@ -1,0 +1,53 @@
+.scene {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: strict;
+}
+
+.staticFallback,
+.canvasMount {
+  position: absolute;
+  inset: 0;
+}
+
+.staticFallback {
+  background:
+    radial-gradient(circle at 78% 27%, rgb(22 137 200 / 7%), transparent 18rem),
+    radial-gradient(circle at 68% 59%, rgb(226 111 59 / 5%), transparent 23rem);
+}
+
+.canvasMount {
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.scene[data-ready="true"] .canvasMount {
+  opacity: 1;
+}
+
+.scene[data-ready="true"][data-active-section*="role"] .canvasMount,
+.scene[data-ready="true"][data-active-section*="workflow"] .canvasMount {
+  opacity: 0.38;
+}
+
+.scene[data-ready="true"][data-active-section*="kyber"] .canvasMount {
+  opacity: 0.64;
+}
+
+.canvasMount canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  touch-action: pan-y;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvasMount {
+    transition: none;
+  }
+}

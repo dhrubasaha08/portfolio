@@ -1,8 +1,48 @@
-# portfolio
-This is a code repository for my portfolio website.
+# Dhruba Saha — Portfolio
 
-## Credits
-- [Forrest Knight](https://github.com/ForrestKnight)
-- [Spaceman by wallmasterr](https://sketchfab.com/3d-models/tenhun-falling-spaceman-fanart-9fd80b6a259f41fd99e6f56eee686dc5)
-- [Planet Surface by jongjawi](https://stock.adobe.com/images/landscape-surface-of-planet-sky-space-science-fiction-fantasy-illustration/330880441?asset_id=330880441)
-- [Position Animation by Teshank](https://github.com/teshank2137/portfolio)
+A content-rich personal portfolio built with React and Vite. The interface
+preserves the original layered space artwork and animated astronaut while
+focusing the public narrative on backend systems, automation, internal tools,
+and selective applied AI.
+
+## Local preview
+
+```powershell
+npm.cmd ci
+npm.cmd run dev -- --host 127.0.0.1 --port 5173
+```
+
+Open <http://127.0.0.1:5173/>.
+
+For a production-equivalent preview:
+
+```powershell
+npm.cmd run build
+npm.cmd run preview -- --host 127.0.0.1 --port 4173
+```
+
+## Validation
+
+```powershell
+npm.cmd run check
+```
+
+The aggregate check runs linting, JavaScript type checking, unit and
+accessibility tests, a production build, asset-budget validation, and browser
+tests.
+
+With the production preview running on port `4173`, capture the desktop and
+mobile chapter screenshots with:
+
+```powershell
+npm.cmd run screenshots
+```
+
+## Publishing
+
+`dev` is the source branch. A successful approved update to `dev` is built into
+the legacy `build` branch by GitHub Actions. Feature branches only run
+validation and never deploy.
+
+Public professional content is governed by the files in `context/` and the
+repository instructions in `AGENTS.md`.

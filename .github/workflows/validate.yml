@@ -1,21 +1,22 @@
-name: Publish portfolio to GitHub Pages branch
+name: Validate portfolio
 
 on:
-  push:
+  pull_request:
     branches: [dev]
+  push:
+    branches: ["agent/**"]
   workflow_dispatch:
 
 concurrency:
-  group: portfolio-pages-publish
+  group: portfolio-validation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-and-publish:
-    name: Build and publish
-    if: github.ref == 'refs/heads/dev'
+  validate:
+    name: Validate with Node.js 22
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -37,7 +38,7 @@ jobs:
       - name: Install Chromium
         run: npx --no-install playwright install --with-deps chromium
 
-      - name: Validate production site
+      - name: Validate application and production build
         run: npm run check
 
       - name: Verify custom domain artifact
@@ -46,11 +47,13 @@ jobs:
           test -f dist/CNAME
           test "$(cat dist/CNAME)" = "dhrubasaha.co.in"
 
-      - name: Publish dist to build branch
-        uses: s0/git-publish-subdir-action@ac113f6bfe8896e85a373534242c949a7ea74c98
-        env:
-          REPO: self
-          BRANCH: build
-          FOLDER: dist
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MESSAGE: "Build: ({sha}) {msg}"
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: portfolio-browser-diagnostics-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
